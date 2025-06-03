@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en" class="bg-gray-50">
   <head>
@@ -32,7 +33,7 @@
     />
   </head>
   <body class="font-sans antialiased min-h-screen flex flex-col">
-    <!-- Login/Signup Page -->
+    <!-- Login Page -->
     <div
       class="min-h-screen w-full flex items-center justify-center bg-gradient-to-bl from-green-100 via-yellow-50 to-red-50 relative"
     >
@@ -95,7 +96,8 @@
         <h2 class="text-center text-lg font-semibold text-gray-700">
           Login to Your Account
         </h2>
-        <form class="space-y-5">
+        <form id="login-form" action="{% url 'core-login' %}" class="space-y-5" method="POST">
+          {% csrf_token %}
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1"
               >Select Role</label
@@ -103,6 +105,7 @@
             <div class="flex gap-3">
               <button
                 type="button"
+                onclick="setRole('admin')"
                 class="flex-1 p-2 bg-blue-100 rounded-lg font-semibold text-blue-700 flex items-center justify-center gap-2 hover:bg-blue-200"
               >
                 <svg
@@ -118,6 +121,7 @@
               </button>
               <button
                 type="button"
+                onclick="setRole('public')"
                 class="flex-1 p-2 bg-red-100 rounded-lg font-semibold text-red-700 flex items-center justify-center gap-2 hover:bg-red-200"
               >
                 <svg
@@ -135,6 +139,7 @@
                 Public
               </button>
             </div>
+            <input type="hidden" name="role" id="role" value="public">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1"
@@ -142,8 +147,10 @@
             >
             <input
               type="email"
+              name="email"
               placeholder="you@email.com"
               class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+              required
             />
           </div>
           <div>
@@ -152,10 +159,18 @@
             >
             <input
               type="password"
+              name="password"
               placeholder="••••••••"
               class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+              required
             />
           </div>
+          {% if user_login_error %}
+            <p class="text-sm text-center text-danger">{{ user_login_error }}</p>
+          {% endif %}
+          {% if admin_login_error %}
+            <p class="text-sm text-center text-danger">{{ admin_login_error }}</p>
+          {% endif %}
           <button
             type="submit"
             class="w-full bg-primary text-white rounded-lg py-2 font-semibold hover:bg-green-600 transition"
@@ -174,6 +189,12 @@
         </form>
       </div>
     </div>
+
+    <script>
+      function setRole(role) {
+        document.getElementById('role').value = role;
+      }
+    </script>
 
     <style>
       body.dark {
