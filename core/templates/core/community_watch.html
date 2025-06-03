@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-50">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Community Watch & Reporting | FreshGuard+</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          fontFamily: { sans: ["Inter", "sans-serif"] },
+          extend: {
+            colors: {
+              primary: "#4CAF50",
+              accent: "#FFE066",
+              danger: "#FF6B6B",
+              safe: "#4CAF50",
+              caution: "#FFD166",
+              risky: "#EF476F",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="font-sans antialiased min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-8 py-6 bg-white shadow">
+      <div class="flex items-center space-x-3">
+        <a
+          href="{% url 'core-dashboard' %}"
+          class="flex items-center space-x-3"
+        >
+          <img
+            src="https://img.icons8.com/color/48/000000/cutting-board.png"
+            alt="FreshGuard+"
+            class="w-10 h-10"
+          />
+          <span class="text-2xl font-bold text-primary">FreshGuard+</span>
+        </a>
+      </div>
+      <a
+        href="{% url 'core-login' %}"
+        class="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition"
+      >
+        Login
+      </a>
+    </div>
+
+    <!-- Community Watch Dashboard -->
+    <div class="max-w-3xl mx-auto py-12 px-4">
+      <h1 class="text-3xl font-bold text-center text-red-600 mb-6">
+        Community Watch & Reporting
+      </h1>
+      <p class="text-center text-gray-600 mb-10">
+        Help us keep the community safe! Report unsafe food practices, expired
+        products, or hygiene issues you observe in stores, restaurants, or
+        public places.
+      </p>
+      <form class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Your Name (optional)</label
+          >
+          <input
+            type="text"
+            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+            placeholder="Enter your name"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Location / Store Name</label
+          >
+          <input
+            type="text"
+            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+            placeholder="e.g. ABC Supermarket, Kathmandu"
+            required
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Issue Type</label
+          >
+          <select
+            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+            required
+          >
+            <option value="">Select an issue</option>
+            <option>Expired Product</option>
+            <option>Improper Storage</option>
+            <option>Unhygienic Conditions</option>
+            <option>Food Contamination</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Description</label
+          >
+          <textarea
+            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+            rows="4"
+            placeholder="Describe the issue in detail..."
+            required
+          ></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Upload Photo (optional)</label
+          >
+          <input type="file" class="w-full text-gray-600" accept="image/*" />
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-red-500 text-white rounded-lg py-2 font-semibold hover:bg-red-600 transition"
+        >
+          Submit Report
+        </button>
+      </form>
+    </div>
+  </body>
+</html>

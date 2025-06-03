@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-50">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI-Powered Waste Reduction & Recipes | FreshGuard+</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          fontFamily: { sans: ["Inter", "sans-serif"] },
+          extend: {
+            colors: {
+              primary: "#4CAF50",
+              accent: "#FFE066",
+              danger: "#FF6B6B",
+              safe: "#4CAF50",
+              caution: "#FFD166",
+              risky: "#EF476F",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="font-sans antialiased min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-8 py-6 bg-white shadow">
+      <div class="flex items-center space-x-3">
+        <a
+          href="{% url 'core-dashboard' %}"
+          class="flex items-center space-x-3"
+        >
+          <img
+            src="https://img.icons8.com/color/48/000000/cutting-board.png"
+            alt="FreshGuard+"
+            class="w-10 h-10"
+          />
+          <span class="text-2xl font-bold text-primary">FreshGuard+</span>
+        </a>
+      </div>
+      <a
+        href="{% url 'core-login' %}"
+        class="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition"
+      >
+        Login
+      </a>
+    </div>
+
+    <!-- AI Waste Reduction & Recipes Dashboard -->
+    <div class="max-w-3xl mx-auto py-12 px-4">
+      <h1 class="text-3xl font-bold text-center text-primary mb-6">
+        AI-Powered Waste Reduction & Recipes
+      </h1>
+      <p class="text-center text-gray-600 mb-10">
+        Enter your leftover ingredients and let our AI suggest creative recipes
+        and tips to reduce food waste!
+      </p>
+      <form class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Your Ingredients</label
+          >
+          <input
+            type="text"
+            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+            placeholder="e.g. rice, tomato, chicken, spinach"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-primary text-white rounded-lg py-2 font-semibold hover:bg-green-600 transition"
+        >
+          Get Recipes & Tips
+        </button>
+      </form>
+      <!-- Example AI Output Section -->
+      <div class="mt-10">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">
+          Suggested Recipes
+        </h2>
+        <ul class="space-y-4">
+          <li class="bg-green-50 border-l-4 border-primary p-4 rounded">
+            <div class="font-semibold text-primary">
+              Spinach Chicken Rice Bowl
+            </div>
+            <div class="text-gray-700 text-sm mt-1">
+              Combine leftover rice, sautéed spinach, and grilled chicken. Top
+              with fresh tomatoes and a squeeze of lemon for a healthy meal.
+            </div>
+          </li>
+          <li class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <div class="font-semibold text-yellow-700">
+              Tomato Rice Frittata
+            </div>
+            <div class="text-gray-700 text-sm mt-1">
+              Mix rice, chopped tomatoes, and eggs. Bake in a skillet for a
+              quick frittata. Add cheese if available.
+            </div>
+          </li>
+        </ul>
+        <h2 class="text-xl font-semibold text-gray-800 mt-8 mb-4">
+          Waste Reduction Tips
+        </h2>
+        <ul class="list-disc pl-6 text-gray-700 space-y-2">
+          <li>Store leftovers in airtight containers to extend freshness.</li>
+          <li>Plan meals ahead to use up perishable ingredients first.</li>
+          <li>Compost vegetable scraps to reduce landfill waste.</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
