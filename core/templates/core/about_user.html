@@ -63,21 +63,97 @@
           <label class="block text-sm custom-label mb-1"
             >Medical Condition</label
           >
-          <select
-            name="medical_condition"
-            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
-            required
-          >
-            <option value="">Select Medical Condition</option>
-            <option>None</option>
-            <option>Diabetes</option>
-            <option>Hypertension</option>
-            <option>Asthma</option>
-            <option>Allergy (Peanut)</option>
-            <option>Allergy (Lactose)</option>
-            <option>Heart Disease</option>
-            <option>Other</option>
-          </select>
+          <div class="relative">
+            <button
+              type="button"
+              id="dropdownMedicalBtn"
+              class="w-full p-2 border border-gray-200 rounded-lg bg-white text-left focus:ring-primary focus:border-primary outline-none flex justify-between items-center"
+              onclick="toggleDropdown()"
+            >
+              <span id="dropdownSelected">Select Medical Condition(s)</span>
+              <svg
+                class="w-4 h-4 ml-2 inline"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div
+              id="dropdownMedical"
+              class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg hidden"
+            >
+              <label class="flex items-center px-4 py-2 hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  name="medical_condition"
+                  value="None"
+                  class="mr-2"
+                /> None
+              </label>
+              <label class="flex items-center px-4 py-2 hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  name="medical_condition"
+                  value="Diabetes"
+                  class="mr-2"
+                /> Diabetes
+              </label>
+              <label class="flex items-center px-4 py-2 hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  name="medical_condition"
+                  value="Hypertension"
+                  class="mr-2"
+                /> Hypertension
+              </label>
+              <label class="flex items-center px-4 py-2 hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  name="medical_condition"
+                  value="Asthma"
+                  class="mr-2"
+                /> Asthma
+              </label>
+              <label class="flex items-center px-4 py-2 hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  name="medical_condition"
+                  value="Allergy (Peanut)"
+                  class="mr-2"
+                /> Allergy (Peanut)
+              </label>
+              <label class="flex items-center px-4 py-2 hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  name="medical_condition"
+                  value="Allergy (Lactose)"
+                  class="mr-2"
+                /> Allergy (Lactose)
+              </label>
+              <label class="flex items-center px-4 py-2 hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  name="medical_condition"
+                  value="Heart Disease"
+                  class="mr-2"
+                /> Heart Disease
+              </label>
+              <label class="flex items-center px-4 py-2 hover:bg-gray-50">
+                <input
+                  type="checkbox"
+                  name="medical_condition"
+                  value="Other"
+                  class="mr-2"
+                /> Other
+              </label>
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">
+            Select one or more medical conditions.
+          </p>
         </div>
         <button
           type="submit"
@@ -87,5 +163,29 @@
         </button>
       </form>
     </div>
+    <script>
+      function toggleDropdown() {
+        document.getElementById("dropdownMedical").classList.toggle("hidden");
+      }
+      // Update selected text
+      const dropdown = document.getElementById("dropdownMedical");
+      const selectedSpan = document.getElementById("dropdownSelected");
+      dropdown.addEventListener("change", function () {
+        const checked = Array.from(
+          dropdown.querySelectorAll("input[type=checkbox]:checked")
+        ).map((cb) => cb.parentNode.textContent.trim());
+        selectedSpan.textContent = checked.length
+          ? checked.join(", ")
+          : "Select Medical Condition(s)";
+      });
+      // Close dropdown if clicked outside
+      document.addEventListener("click", function (event) {
+        const btn = document.getElementById("dropdownMedicalBtn");
+        const menu = document.getElementById("dropdownMedical");
+        if (!btn.contains(event.target) && !menu.contains(event.target)) {
+          menu.classList.add("hidden");
+        }
+      });
+    </script>
   </body>
 </html>

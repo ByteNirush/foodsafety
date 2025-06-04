@@ -141,12 +141,15 @@
             >
             <input
               type="password"
+              name="confirm_password"
               id="confirm-password"
               placeholder="••••••••"
               class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
               required
             />
-            <p id="password-error" class="text-sm text-danger hidden">Passwords do not match</p>
+            <p id="password-error" class="text-sm text-danger hidden">
+              Passwords do not match
+            </p>
           </div>
           {% if user_signup_error %}
             <p class="text-sm text-center text-danger">{{ user_signup_error }}</p>
@@ -175,26 +178,27 @@
 
     <script>
       function setRole(role) {
-        document.getElementById('role').value = role;
-        const adminCodeField = document.getElementById('admin-code-field');
-        if (role === 'admin') {
-          adminCodeField.classList.remove('hidden');
+        document.getElementById("role").value = role;
+        const adminCodeField = document.getElementById("admin-code-field");
+        if (role === "admin") {
+          adminCodeField.classList.remove("hidden");
         } else {
-          adminCodeField.classList.add('hidden');
-          document.querySelector('input[name="admin_code"]').value = '';
+          adminCodeField.classList.add("hidden");
+          document.querySelector('input[name="admin_code"]').value = "";
         }
       }
 
       function validatePasswords() {
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-        const errorElement = document.getElementById('password-error');
-        
+        const password = document.getElementById("password").value;
+        const confirmPassword =
+          document.getElementById("confirm-password").value;
+        const errorElement = document.getElementById("password-error");
+
         if (password !== confirmPassword) {
-          errorElement.classList.remove('hidden');
+          errorElement.classList.remove("hidden");
           return false;
         } else {
-          errorElement.classList.add('hidden');
+          errorElement.classList.add("hidden");
           return true;
         }
       }
