@@ -7,7 +7,7 @@ from django.contrib import messages
 import requests
 
 from foodsafety import settings
-from .models import CustomUser, Product
+from .models import CustomUser, Product, CommunityReport, Comment
 
 def index(request):
     return render(request, 'core/login.html')
@@ -70,7 +70,23 @@ def dashboard(request):
 
 @login_required
 def community_watch(request):
-    return render(request, 'core/community_watch.html')
+    if request.method == 'POST':
+        # Save the new report
+        CommunityReport.objects.create(
+            reporter_name=request.POST.get('reporter_name'),
+            item_name=request.POST.get('item_name'),
+            location=request.POST.get('location'),
+            issue_type=request.POST.get('issue_type'),
+            description=request.POST.get('description'),
+            photo=request.FILES.get('photo')
+        )
+        return redirect('core-community_watch')  # Redirect to clear POST and avoid resubmission
+
+    reports = CommunityReport.objects.all().order_by('-created_at')
+    return render(request, 'core/community_watch.html', {
+        'reports': reports,
+        'user': request.user,
+    })
 
 @login_required
 def ai_waste_dashboard(request):
@@ -238,3 +254,25 @@ def delete_product(request, product_id):
         product.delete()
         messages.success(request, 'Product deleted successfully!')
     return redirect('core-donation_portal_dashboard')
+
+def add_comment(request, report_id):
+    if request.method == 'POST':
+        report = get_object_or_404(CommunityReport, id=report_id)
+        text = request.POST.get('comment')
+        if text and request.user.is_authenticated:
+            Comment.objects.create(
+                report=report,
+                user=request.user,
+                text=text
+            )
+    return redirect('core-community_watch')
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from .models import CommunityReport
+
+@login_required
+def delete_community_report(request, report_id):
+    report = get_object_or_404(CommunityReport, id=report_id)
+    if request.user.is_superuser or report.reporter_name == request.user.get_full_name() or report.reporter_name == request.user.username:
+        report.delete()
+    return redirect('core-community_watch')

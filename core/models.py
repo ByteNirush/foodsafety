@@ -1,6 +1,7 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, User
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 
 class CustomUser(AbstractUser):
     is_admin = models.BooleanField(default=False)
@@ -38,3 +39,18 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+class CommunityReport(models.Model):
+    reporter_name = models.CharField(max_length=100)
+    item_name = models.CharField(max_length=100)
+    location = models.CharField(max_length=200)
+    issue_type = models.CharField(max_length=100)
+    description = models.TextField()
+    photo = models.ImageField(upload_to='reports/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class Comment(models.Model):
+    report = models.ForeignKey(CommunityReport, related_name='comments', on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
