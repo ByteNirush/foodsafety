@@ -199,15 +199,11 @@ def check_safety(request):
                 api_response = result.get('choices', [{}])[0].get('message', {}).get('content', '{}')
                 safety_data = json.loads(api_response) if isinstance(api_response, str) else api_response
 
-                print(safety_data)
-
                 # Ensure consistent double quotes by re-serializing
                 safety_data = json.loads(json.dumps(safety_data, ensure_ascii=False))
 
                 # Ensure response is a list
                 safety_response = [safety_data] if isinstance(safety_data, dict) else safety_data
-
-                print(safety_response)
 
                 # Add ingredient to each response item
                 for item in safety_response:
