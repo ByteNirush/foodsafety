@@ -18,4 +18,6 @@ urlpatterns = [
     path('product/add/', views.add_product, name='add-product'),
     path('profile/', views.profile, name='core-profile'),
     path('ingredient_scanner_dashboard/', views.check_safety, name='core-check_safety'),
+    path('donation/details/<int:product_id>/', views.donation_details, name='donation-details'),
+    path('product/delete/<int:product_id>/', views.delete_product, name='delete-product'),
 ]

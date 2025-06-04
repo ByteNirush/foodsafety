@@ -1,6 +1,6 @@
 import json
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -223,3 +223,18 @@ def check_safety(request):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
+def donation_details(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    if request.method == 'POST':
+        # Process donation details here
+        # ...
+        return redirect('core-donation_portal_dashboard')
+    return render(request, 'core/donation_details.html', {'product': product})
+
+def delete_product(request, product_id):
+    if request.method == 'POST':
+        product = get_object_or_404(Product, id=product_id)
+        product.delete()
+        messages.success(request, 'Product deleted successfully!')
+    return redirect('core-donation_portal_dashboard')
