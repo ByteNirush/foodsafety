@@ -93,16 +93,20 @@ def logout_view(request):
     return redirect('index')
 
 def donation_portal_dashboard(request):
-    products = Product.objects.all().order_by('expire_date')
-    total_products = len(products)
+    # Optional: implement search
+    search_query = request.GET.get('search', '')
+    if search_query:
+        products = Product.objects.filter(name__icontains=search_query).order_by('expire_date')
+    else:
+        products = Product.objects.all().order_by('expire_date')
+    total_products = products.count()
     third = total_products // 3
-    # Define indices for color coding
     red_end = third
     yellow_end = third * 2
     context = {
         'products': products,
         'red_end': red_end,
-        'yellow_end': yellow_end
+        'yellow_end': yellow_end,
     }
     return render(request, 'core/donation_portal_dashboard.html', context)
 
