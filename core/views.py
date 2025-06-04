@@ -50,10 +50,12 @@ def user_about(request):
     if request.method == 'POST':
         gender = request.POST.get('gender')
         dob = request.POST.get('dob')
-        medical_condition = request.POST.get('medical_condition')
+        # Get all selected medical conditions as a list
+        medical_conditions = request.POST.getlist('medical_condition')
+        # Join them as a comma-separated string
         request.user.gender = gender
         request.user.dob = dob
-        request.user.medical_condition = medical_condition
+        request.user.medical_condition = ', '.join(medical_conditions)
         request.user.save()
         return redirect('core-dashboard')
     return render(request, 'core/about_user.html')
@@ -125,3 +127,19 @@ def add_product(request):
             messages.error(request, f'Error adding product: {str(e)}')
         return redirect('core-donation_portal_dashboard')
     return redirect('core/donation_portal_dashboard.html')
+
+def profile(request):
+    user = request.user
+    medical_condition_str = getattr(user, "medical_condition", "")
+    if medical_condition_str:
+        medical_condition_list = [c.strip() for c in medical_condition_str.split(",") if c.strip()]
+    else:
+        medical_condition_list = []
+    context = {
+        "user": user,
+        "gender": getattr(user, "gender", ""),
+        "dob": getattr(user, "dob", ""),
+        "medical_condition": medical_condition_str,
+        "medical_condition_list": medical_condition_list,
+    }
+    return render(request, "core/profile.html", context)

@@ -34,7 +34,11 @@
       <h2 class="text-center text-2xl font-bold text-primary mb-4">
         Tell us about yourself
       </h2>
-      <form method="post" action="{% url 'core-about-user' %}" class="space-y-5">
+      <form
+        method="post"
+        action="{% url 'core-about-user' %}"
+        class="space-y-5"
+      >
         {% csrf_token %}
         <div>
           <label class="block text-sm custom-label mb-1">Gender</label>
@@ -91,7 +95,8 @@
                   name="medical_condition"
                   value="None"
                   class="mr-2"
-                /> None
+                />
+                None
               </label>
               <label class="flex items-center px-4 py-2 hover:bg-gray-50">
                 <input
@@ -99,7 +104,8 @@
                   name="medical_condition"
                   value="Diabetes"
                   class="mr-2"
-                /> Diabetes
+                />
+                Diabetes
               </label>
               <label class="flex items-center px-4 py-2 hover:bg-gray-50">
                 <input
@@ -107,7 +113,8 @@
                   name="medical_condition"
                   value="Hypertension"
                   class="mr-2"
-                /> Hypertension
+                />
+                Hypertension
               </label>
               <label class="flex items-center px-4 py-2 hover:bg-gray-50">
                 <input
@@ -115,7 +122,8 @@
                   name="medical_condition"
                   value="Asthma"
                   class="mr-2"
-                /> Asthma
+                />
+                Asthma
               </label>
               <label class="flex items-center px-4 py-2 hover:bg-gray-50">
                 <input
@@ -123,7 +131,8 @@
                   name="medical_condition"
                   value="Allergy (Peanut)"
                   class="mr-2"
-                /> Allergy (Peanut)
+                />
+                Allergy (Peanut)
               </label>
               <label class="flex items-center px-4 py-2 hover:bg-gray-50">
                 <input
@@ -131,7 +140,8 @@
                   name="medical_condition"
                   value="Allergy (Lactose)"
                   class="mr-2"
-                /> Allergy (Lactose)
+                />
+                Allergy (Lactose)
               </label>
               <label class="flex items-center px-4 py-2 hover:bg-gray-50">
                 <input
@@ -139,7 +149,8 @@
                   name="medical_condition"
                   value="Heart Disease"
                   class="mr-2"
-                /> Heart Disease
+                />
+                Heart Disease
               </label>
               <label class="flex items-center px-4 py-2 hover:bg-gray-50">
                 <input
@@ -147,7 +158,8 @@
                   name="medical_condition"
                   value="Other"
                   class="mr-2"
-                /> Other
+                />
+                Other
               </label>
             </div>
           </div>
