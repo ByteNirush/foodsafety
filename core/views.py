@@ -49,7 +49,7 @@ def signup(request):
             admin_code=admin_code if is_admin else None
         )
         login(request, user)  # Now uses django.contrib.auth.login
-        next_url = request.GET.get('next', 'core-admin_dashboard' if is_admin else 'core-dashboard')
+        next_url = request.GET.get('next', 'core-admin_dashboard' if is_admin else 'core-about-user')
         return redirect(next_url)
 
     return render(request, 'core/signup.html')
