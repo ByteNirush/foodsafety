@@ -28,32 +28,34 @@ def signup(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         full_name = request.POST.get('full_name')
-        admin_code = request.POST.get('admin_code', None)
-        is_admin = bool(admin_code)
 
         if CustomUser.objects.filter(email=email).exists():
             return render(request, 'core/signup.html', {
-                'user_signup_error': 'Email already exists' if not is_admin else None,
-                'admin_signup_error': 'Email already exists' if is_admin else None
+                'user_signup_error': 'Email already exists',
             })
-
-        if is_admin and admin_code != 'rojan123':  # Replace with your secure admin code
-            return render(request, 'core/signup.html', {'admin_signup_error': 'Invalid admin code'})
 
         user = CustomUser.objects.create_user(
             username=email,
             email=email,
             password=password,
             first_name=full_name,
-            is_admin=is_admin,
-            admin_code=admin_code if is_admin else None
         )
         login(request, user)  # Now uses django.contrib.auth.login
-        next_url = request.GET.get('next', 'core-admin_dashboard' if is_admin else 'core-about-user')
+        next_url = request.GET.get('next', 'core-about-user')
         return redirect(next_url)
 
     return render(request, 'core/signup.html')
+@login_required
 def user_about(request):
+    if request.method == 'POST':
+        gender = request.POST.get('gender')
+        dob = request.POST.get('dob')
+        medical_condition = request.POST.get('medical_condition')
+        request.user.gender = gender
+        request.user.dob = dob
+        request.user.medical_condition = medical_condition
+        request.user.save()
+        return redirect('core-dashboard')
     return render(request, 'core/about_user.html')
 @login_required
 def dashboard(request):
