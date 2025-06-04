@@ -35,19 +35,32 @@
     <!-- Header -->
     <div class="flex items-center justify-between px-8 py-6 bg-white shadow">
       <div class="flex items-center space-x-3">
-        <img
-          src="https://img.icons8.com/color/48/000000/cutting-board.png"
-          alt="FreshGuard+"
-          class="w-10 h-10"
-        />
-        <span class="text-2xl font-bold text-primary">FreshGuard+</span>
+        <a
+          href="{% url 'core-dashboard' %}"
+          class="flex items-center space-x-3"
+        >
+          <img
+            src="https://img.icons8.com/color/48/000000/cutting-board.png"
+            alt="FreshGuard+"
+            class="w-10 h-10"
+          />
+          <span class="text-2xl font-bold text-primary">FreshGuard+</span>
+        </a>
       </div>
-      <a
-        href="{% url 'core-login' %}"
-        class="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition"
-      >
-        Login
-      </a>
+      <div class="flex items-center space-x-4">
+        <a
+          href="{% url 'core-profile' %}"
+          class="bg-white border border-primary text-primary px-5 py-2 rounded-lg font-semibold hover:bg-primary hover:text-white transition"
+        >
+          Profile
+        </a>
+        <a
+          href="{% url 'core-logout' %}"
+          class="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition"
+        >
+          Logout
+        </a>
+      </div>
     </div>
 
     <!-- Main Content -->
