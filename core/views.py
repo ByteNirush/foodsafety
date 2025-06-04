@@ -170,7 +170,7 @@ def check_safety(request):
                     {
                         "role": "system",
                         "content": (
-                            "You are a food safety expert. Provide a concise safety assessment for the given ingredient "
+                            "You are a food safety expert. Provide a concise safety assessment for the given product"
                             "based on the user's medical condition. Return JSON with 'status' (Safe, Caution, Risky), "
                             "'score' (0-100), and 'explanation'. Use double quotes for all strings."
                         )
@@ -199,11 +199,15 @@ def check_safety(request):
                 api_response = result.get('choices', [{}])[0].get('message', {}).get('content', '{}')
                 safety_data = json.loads(api_response) if isinstance(api_response, str) else api_response
 
+                print(safety_data)
+
                 # Ensure consistent double quotes by re-serializing
                 safety_data = json.loads(json.dumps(safety_data, ensure_ascii=False))
 
                 # Ensure response is a list
                 safety_response = [safety_data] if isinstance(safety_data, dict) else safety_data
+
+                print(safety_response)
 
                 # Add ingredient to each response item
                 for item in safety_response:
