@@ -53,7 +53,8 @@ def signup(request):
         return redirect(next_url)
 
     return render(request, 'core/signup.html')
-
+def user_about(request):
+    return render(request, 'core/about_user.html')
 @login_required
 def dashboard(request):
     return render(request, 'core/dashboard.html')
