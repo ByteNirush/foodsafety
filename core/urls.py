@@ -8,4 +8,5 @@ urlpatterns = [
     path('community-watch/', views.community_watch, name='core-community-watch'),
     path('ai-waste-dashboard/', views.ai_waste_dashboard, name='core-ai-waste-dashboard'),
     path('ingredient-scanner-dashboard/', views.ingredient_scanner_dashboard, name='core-ingredient-scanner-dashboard'),
+    path('about_user/', views.about_user, name='core-about-user'),
 ]
