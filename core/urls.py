@@ -14,4 +14,6 @@ urlpatterns = [
     path('impact-analytics-dashboard/', views.impact_analytics_dashboard, name='core-impact_analytics_dashboard'),
     path('admin-dashboard/', views.admin_dashboard, name='core-admin_dashboard'),
     path('logout/', views.logout_view, name='core-logout'),
+    path('donation/submit/', views.submit_donation, name='donation-submit'),
+    path('product/add/', views.add_product, name='add-product'),
 ]

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import CustomUser
+from .models import CustomUser, Product
 
 def index(request):
     return render(request, 'core/login.html')
@@ -74,10 +74,6 @@ def ingredient_scanner_dashboard(request):
     return render(request, 'core/ingredient_scanner_dashboard.html')
 
 @login_required
-def donation_portal_dashboard(request):
-    return render(request, 'core/donation_portal_dashboard.html')
-
-@login_required
 def impact_analytics_dashboard(request):
     return render(request, 'core/impact_analytics_dashboard.html')
 
@@ -88,3 +84,44 @@ def admin_dashboard(request):
 def logout_view(request):
     logout(request)
     return redirect('index')
+
+def donation_portal_dashboard(request):
+    products = Product.objects.all().order_by('expire_date')
+    total_products = len(products)
+    third = total_products // 3
+    # Define indices for color coding
+    red_end = third
+    yellow_end = third * 2
+    context = {
+        'products': products,
+        'red_end': red_end,
+        'yellow_end': yellow_end
+    }
+    return render(request, 'core/donation_portal_dashboard.html', context)
+
+def submit_donation(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        food_items = request.POST.get('food_items')
+        pickup_location = request.POST.get('pickup_location')
+        messages.success(request, 'Donation submitted successfully!')
+        return redirect('core-donation_portal_dashboard')
+    return redirect('core/donation_portal_dashboard.html')
+
+def add_product(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        manufacture_date = request.POST.get('manufacture_date')
+        expire_date = request.POST.get('expire_date')
+        try:
+            Product.objects.create(
+                name=name,
+                manufacture_date=manufacture_date,
+                expire_date=expire_date
+            )
+            messages.success(request, 'Product added successfully!')
+        except Exception as e:
+            messages.error(request, f'Error adding product: {str(e)}')
+        return redirect('core-donation_portal_dashboard')
+    return redirect('core/donation_portal_dashboard.html')

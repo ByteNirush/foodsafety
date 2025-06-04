@@ -26,6 +26,10 @@
         },
       };
     </script>
+    <link
+      href="https://unpkg.com/heroicons@2.0.18/dist/heroicons.min.css"
+      rel="stylesheet"
+    />
   </head>
   <body class="font-sans antialiased min-h-screen bg-gray-50">
     <!-- Header -->
@@ -46,88 +50,161 @@
       </a>
     </div>
 
-    <!-- Donation Matchmaking Portal Dashboard -->
-    <div class="max-w-3xl mx-auto py-12 px-4">
-      <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">
-        Donation Matchmaking Portal
-      </h1>
-      <p class="text-center text-gray-600 mb-10">
-        Connect with local charities and NGOs to donate surplus food easily and
-        efficiently.
-      </p>
-      <form class="bg-white rounded-xl shadow-lg p-8 space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Your Name / Organization</label
-          >
-          <input
-            type="text"
-            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
-            placeholder="e.g. John Doe, ABC Restaurant"
-            required
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Contact Email</label
-          >
-          <input
-            type="email"
-            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
-            placeholder="you@email.com"
-            required
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Food Items for Donation</label
-          >
-          <textarea
-            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
-            rows="3"
-            placeholder="List the food items you want to donate"
-            required
-          ></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Pickup Location</label
-          >
-          <input
-            type="text"
-            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
-            placeholder="e.g. ABC Restaurant, Kathmandu"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          class="w-full bg-blue-500 text-white rounded-lg py-2 font-semibold hover:bg-blue-600 transition"
-        >
-          Submit Donation
-        </button>
-      </form>
-      <!-- Example Matched NGOs Section -->
-      <div class="mt-10">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">
-          Matched NGOs/Charities
-        </h2>
-        <ul class="space-y-4">
-          <li class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
-            <div class="font-semibold text-blue-700">Food For All Nepal</div>
-            <div class="text-gray-700 text-sm mt-1">
-              Contact: foodforall@email.com<br />
-              Area: Kathmandu, Lalitpur
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-12 px-4 flex flex-col md:flex-row gap-6">
+      <!-- Center Section: Add Product and Product List -->
+      <div class="md:w-2/3">
+        <!-- Add Product Form -->
+        <div class="mb-10">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">
+            Add New Product
+          </h2>
+          <form class="bg-white rounded-xl shadow-lg p-8 space-y-6" method="POST" action="{% url 'add-product' %}">
+            {% csrf_token %}
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Product Name</label
+              >
+              <input
+                type="text"
+                name="name"
+                class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+                placeholder="e.g. Milk, Bread"
+                required
+              />
             </div>
-          </li>
-          <li class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-            <div class="font-semibold text-green-700">Nepal Food Rescue</div>
-            <div class="text-gray-700 text-sm mt-1">
-              Contact: rescue@nepalfood.org<br />
-              Area: Bhaktapur, Kathmandu
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Manufacture Date</label
+              >
+              <input
+                type="date"
+                name="manufacture_date"
+                class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+                required
+              />
             </div>
-          </li>
-        </ul>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Expire Date</label
+              >
+              <input
+                type="date"
+                name="expire_date"
+                class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              class="w-full bg-green-500 text-white rounded-lg py-2 font-semibold hover:bg-green-600 transition"
+            >
+              Add Product
+            </button>
+          </form>
+        </div>
+
+        <!-- Product List -->
+        <div>
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">
+            Available Products (Sorted by Expiry)
+          </h2>
+          {% if products %}
+          <ul class="space-y-4">
+            {% for product in products %}
+            <li class="p-4 rounded flex justify-between items-center {% if forloop.counter0 < red_end %}bg-red-50 border-l-4 border-risky{% elif forloop.counter0 < yellow_end %}bg-yellow-50 border-l-4 border-caution{% else %}bg-green-50 border-l-4 border-safe{% endif %}">
+              <div>
+                <div class="font-semibold text-gray-800">{{ product.name }}</div>
+                <div class="text-gray-700 text-sm mt-1">
+                  Manufacture Date: {{ product.manufacture_date|date:"Y-m-d" }}<br />
+                  Expiry Date: {{ product.expire_date|date:"Y-m-d" }}
+                </div>
+              </div>
+              <div class="flex space-x-2">
+                <a href="#" title="Donate" class="text-blue-600 hover:text-blue-800">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </a>
+                <a href="#" title="Throw" class="text-red-600 hover:text-red-800">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4m-4 0a2 2 0 00-2 2v1h8V5a2 2 0 00-2-2m0 0h4m-8 0H7"></path>
+                  </svg>
+                </a>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="text-gray-600">No products available.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Right Sidebar: Donation Form -->
+      <div class="md:w-1/3">
+        <div class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">
+            Submit Donation
+          </h2>
+          <form method="POST" action="{% url 'donation-submit' %}">
+            {% csrf_token %}
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Your Name / Organization</label
+              >
+              <input
+                type="text"
+                name="name"
+                class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+                placeholder="e.g. John Doe, ABC Restaurant"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Contact Email</label
+              >
+              <input
+                type="email"
+                name="email"
+                class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+                placeholder="you@email.com"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Food Items for Donation</label
+              >
+              <textarea
+                name="food_items"
+                class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+                rows="3"
+                placeholder="List the food items you want to donate"
+                required
+              ></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Pickup Location</label
+              >
+              <input
+                type="text"
+                name="pickup_location"
+                class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+                placeholder="e.g. ABC Restaurant, Kathmandu"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              class="w-full bg-blue-500 text-white rounded-lg py-2 font-semibold hover:bg-blue-600 transition"
+            >
+              Submit Donation
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   </body>
