@@ -1,7 +1,12 @@
+import json
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+import requests
+
+from foodsafety import settings
 from .models import CustomUser, Product
 
 def index(request):
@@ -50,10 +55,12 @@ def user_about(request):
     if request.method == 'POST':
         gender = request.POST.get('gender')
         dob = request.POST.get('dob')
-        medical_condition = request.POST.get('medical_condition')
+        # Get all selected medical conditions as a list
+        medical_conditions = request.POST.getlist('medical_condition')
+        # Join them as a comma-separated string
         request.user.gender = gender
         request.user.dob = dob
-        request.user.medical_condition = medical_condition
+        request.user.medical_condition = ', '.join(medical_conditions)
         request.user.save()
         return redirect('core-dashboard')
     return render(request, 'core/about_user.html')
@@ -125,3 +132,90 @@ def add_product(request):
             messages.error(request, f'Error adding product: {str(e)}')
         return redirect('core-donation_portal_dashboard')
     return redirect('core/donation_portal_dashboard.html')
+
+def profile(request):
+    user = request.user
+    medical_condition_str = getattr(user, "medical_condition", "")
+    if medical_condition_str:
+        medical_condition_list = [c.strip() for c in medical_condition_str.split(",") if c.strip()]
+    else:
+        medical_condition_list = []
+    context = {
+        "user": user,
+        "gender": getattr(user, "gender", ""),
+        "dob": getattr(user, "dob", ""),
+        "medical_condition": medical_condition_str,
+        "medical_condition_list": medical_condition_list,
+    }
+    return render(request, "core/profile.html", context)
+
+@login_required
+def check_safety(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            ingredient = data.get('ingredient')
+            expiration = data.get('expiration')
+            conditions = data.get('conditions')
+
+            # OpenRouter API call
+            url = "https://openrouter.ai/api/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {'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'}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": "meta-llama/llama-3.1-8b-instruct",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are a food safety expert. Provide a concise safety assessment for the given ingredient "
+                            "based on the user's medical condition. Return JSON with 'status' (Safe, Caution, Risky), "
+                            "'score' (0-100), and 'explanation'. Use double quotes for all strings."
+                        )
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            f"Assess the safety of {ingredient} for someone with {conditions}. "
+                            f"Expiration date: {expiration or 'not provided'}. "
+                            "Return the response in JSON format with 'status', 'score', and 'explanation' fields. "
+                            "Use double quotes for all strings."
+                        )
+                    }
+                ],
+                "max_tokens": 200,
+                "temperature": 0.2,
+                "top_p": 0.9
+            }
+
+            try:
+                response = requests.post(url, json=payload, headers=headers, timeout=10)
+                response.raise_for_status()
+                result = response.json()
+
+                # Parse and normalize response
+                api_response = result.get('choices', [{}])[0].get('message', {}).get('content', '{}')
+                safety_data = json.loads(api_response) if isinstance(api_response, str) else api_response
+
+                # Ensure consistent double quotes by re-serializing
+                safety_data = json.loads(json.dumps(safety_data, ensure_ascii=False))
+
+                # Ensure response is a list
+                safety_response = [safety_data] if isinstance(safety_data, dict) else safety_data
+
+                # Add ingredient to each response item
+                for item in safety_response:
+                    item['ingredient'] = ingredient
+
+                return JsonResponse(safety_response, safe=False)
+            except requests.exceptions.RequestException as e:
+                return JsonResponse({
+                    "error": f"API request failed: {str(e)}"
+                }, status=500)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid request data"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    return JsonResponse({"error": "Invalid request method"}, status=405)

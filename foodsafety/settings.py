@@ -4,7 +4,7 @@ Django settings for foodsafety project.
 
 import os
 from pathlib import Path
-
+OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'Rojan123'  # Replace with a secure key
