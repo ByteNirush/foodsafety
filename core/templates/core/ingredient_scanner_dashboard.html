@@ -26,8 +26,31 @@
         },
       };
     </script>
+    <style>
+      /* Spinner animation */
+      .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #4CAF50;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
   </head>
   <body class="font-sans antialiased min-h-screen bg-gray-50">
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-lg p-6 flex flex-col items-center space-y-4">
+        <div class="spinner"></div>
+        <p class="text-gray-700 font-semibold">Checking ingredient safety...</p>
+      </div>
+    </div>
+
     <!-- Header -->
     <div class="flex items-center justify-between px-8 py-6 bg-white shadow">
       <div class="flex items-center space-x-3">
@@ -43,12 +66,20 @@
           <span class="text-2xl font-bold text-primary">FreshGuard+</span>
         </a>
       </div>
-      <a
-        href="{% url 'core-login' %}"
-        class="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition"
-      >
-        Login
-      </a>
+      <div class="flex items-center space-x-4">
+        <a
+          href="{% url 'core-profile' %}"
+          class="bg-white border border-primary text-primary px-5 py-2 rounded-lg font-semibold hover:bg-primary hover:text-white transition"
+        >
+          Profile
+        </a>
+        <a
+          href="{% url 'core-logout' %}"
+          class="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition"
+        >
+          Logout
+        </a>
+      </div>
     </div>
 
     <!-- Ingredient Safety Scanner Dashboard -->
@@ -57,16 +88,17 @@
         Ingredient Safety Scanner
       </h1>
       <p class="text-center text-gray-600 mb-10">
-        Enter or scan your ingredient to check for safety, freshness, and
-        possible health risks.
+        Enter or scan your ingredient to check for safety based on your medical conditions.
       </p>
-      <form class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+      <form id="ingredient-form" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+        {% csrf_token %}
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1"
             >Ingredient Name</label
           >
           <input
             type="text"
+            name="ingredient"
             class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
             placeholder="e.g. Milk, Chicken, Spinach"
             required
@@ -78,8 +110,25 @@
           >
           <input
             type="date"
+            name="expiration"
             class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
           />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Medical Conditions</label
+          >
+          <select
+            name="conditions"
+            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
+            required
+          >
+            <option value="" disabled selected>Select a condition</option>
+            <option value="Diabetes">Diabetes</option>
+            <option value="Asthma">Asthma</option>
+            <option value="Nut Allergy">Nut Allergy</option>
+            <option value="Lactose Intolerance">Lactose Intolerance</option>
+          </select>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1"
@@ -88,9 +137,10 @@
           <div class="flex gap-2 items-center mb-2">
             <input
               type="text"
+              name="qr-result"
+              id="qr-result"
               class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
               placeholder="Paste QR code data here"
-              id="qr-result"
             />
             <button
               type="button"
@@ -148,119 +198,19 @@
           Check Safety
         </button>
       </form>
-      <!-- Example Output Section -->
-      <div class="mt-10">
+      <!-- Dynamic Output Section -->
+      <div class="mt-10" id="ingredient-status">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">
           Ingredient Status
         </h2>
-        <div
-          class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded mb-4 flex items-center justify-between"
-        >
-          <div>
-            <div class="font-semibold text-yellow-700">
-              Instant Noodles (E621)
-            </div>
-            <div class="text-gray-700 text-sm mt-1">
-              <span class="font-semibold">Status:</span>
-              <span
-                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-200 text-yellow-800 ml-1"
-                >Caution</span
-              >
-              <br />
-              <span class="font-semibold">Explanation:</span>
-              <button
-                onclick="document.getElementById('explain-popup').classList.remove('hidden')"
-                class="underline text-blue-600 text-xs ml-1"
-              >
-                Why?
-              </button>
-            </div>
-          </div>
-          <div>
-            <span
-              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-400 text-white"
-              >Safety Score: 60</span
-            >
-          </div>
-        </div>
-        <!-- Explanation Pop-up -->
-        <div
-          id="explain-popup"
-          class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden"
-        >
-          <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
-            <h3 class="text-lg font-semibold mb-2 text-yellow-700">
-              Explanation
-            </h3>
-            <p class="text-gray-700 mb-2">
-              Contains
-              <span class="font-bold">E621 (Monosodium Glutamate)</span>, known
-              to trigger headaches and allergic reactions in sensitive
-              individuals.
-            </p>
-            <div class="mb-2">
-              <span class="font-semibold">Sources:</span>
-              <ul class="list-disc pl-5 text-xs text-gray-600">
-                <li>WHO</li>
-                <li>EU Food Safety Authority</li>
-                <li>Nepal DFTQC</li>
-              </ul>
-            </div>
-            <button
-              onclick="document.getElementById('explain-popup').classList.add('hidden')"
-              class="mt-2 px-4 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-        <div
-          class="bg-green-50 border-l-4 border-green-400 p-4 rounded flex items-center justify-between"
-        >
-          <div>
-            <div class="font-semibold text-green-700">Spinach</div>
-            <div class="text-gray-700 text-sm mt-1">
-              <span class="font-semibold">Status:</span>
-              <span
-                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-200 text-green-800 ml-1"
-                >Safe</span
-              >
-            </div>
-          </div>
-          <div>
-            <span
-              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-400 text-white"
-              >Safety Score: 95</span
-            >
-          </div>
-        </div>
-        <div
-          class="bg-red-50 border-l-4 border-red-400 p-4 rounded flex items-center justify-between mt-4"
-        >
-          <div>
-            <div class="font-semibold text-red-700">Chicken (Expired)</div>
-            <div class="text-gray-700 text-sm mt-1">
-              <span class="font-semibold">Status:</span>
-              <span
-                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-200 text-red-800 ml-1"
-                >Risky</span
-              >
-            </div>
-          </div>
-          <div>
-            <span
-              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-400 text-white"
-              >Safety Score: 30</span
-            >
-          </div>
-        </div>
+        <div id="results"></div>
       </div>
     </div>
     <script>
-      // Simple popup logic for explanation
+      // Modal logic
       document.addEventListener("keydown", function (e) {
         if (e.key === "Escape") {
-          document.getElementById("explain-popup").classList.add("hidden");
+          document.getElementById("explain-popup")?.classList.add("hidden");
           document.getElementById("qr-modal").classList.add("hidden");
         }
       });
@@ -274,6 +224,92 @@
       function simulateQRScan() {
         document.getElementById("qr-result").value = "Instant Noodles (E621)";
         closeQRScanner();
+      }
+
+      // Form submission with loading screen
+      document.getElementById("ingredient-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const loadingOverlay = document.getElementById("loading-overlay");
+        loadingOverlay.classList.remove("hidden");
+
+        const formData = new FormData(e.target);
+        const data = {
+          ingredient: formData.get("ingredient") || formData.get("qr-result"),
+          expiration: formData.get("expiration"),
+          conditions: formData.get("conditions"),
+        };
+
+        try {
+          const response = await fetch("/ingredient_scanner_dashboard/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
+            },
+            body: JSON.stringify(data),
+          });
+          const result = await response.json();
+          loadingOverlay.classList.add("hidden");
+          displayResults(result);
+        } catch (error) {
+          console.error("Error:", error);
+          loadingOverlay.classList.add("hidden");
+          document.getElementById("results").innerHTML = `
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+              <div class="font-semibold text-red-700">Error</div>
+              <div class="text-gray-700 text-sm mt-1">Failed to check safety. Please try again.</div>
+            </div>
+          `;
+        }
+      });
+
+      function displayResults(data) {
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = "";
+        data.forEach(item => {
+          const statusColor = item.status === "Safe" ? "green" : item.status === "Caution" ? "yellow" : "red";
+          const statusClass = `bg-${statusColor}-50 border-l-4 border-${statusColor}-400`;
+          const badgeClass = `bg-${statusColor}-200 text-${statusColor}-800`;
+          const scoreClass = `bg-${statusColor}-400 text-white`;
+          resultsDiv.innerHTML += `
+            <div class="${statusClass} p-4 rounded mb-4 flex items-center justify-between">
+              <div>
+                <div class="font-semibold text-${statusColor}-700">${item.ingredient}</div>
+                <div class="text-gray-700 text-sm mt-1">
+                  <span class="font-semibold">Status:</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badgeClass} ml-1">${item.status}</span>
+                  <br />
+                  <span class="font-semibold">Explanation:</span>
+                  <button onclick="showExplanation('${item.explanation}', '${item.ingredient}')"
+                    class="underline text-blue-600 text-xs ml-1">Why?</button>
+                </div>
+              </div>
+              <div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${scoreClass}">
+                  Safety Score: ${item.score}
+                </span>
+              </div>
+            </div>
+          `;
+        });
+
+        // Explanation popup
+        window.showExplanation = (explanation, ingredient) => {
+          const popup = document.createElement("div");
+          popup.id = "explain-popup";
+          popup.className = "fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50";
+          popup.innerHTML = `
+            <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+              <h3 class="text-lg font-semibold mb-2 text-yellow-700">Explanation for ${ingredient}</h3>
+              <p class="text-gray-700 mb-2">${explanation}</p>
+              <button onclick="this.closest('#explain-popup').remove()"
+                class="mt-2 px-4 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                Close
+              </button>
+            </div>
+          `;
+          document.body.appendChild(popup);
+        };
       }
     </script>
   </body>

@@ -96,11 +96,7 @@
         <h2 class="text-center text-lg font-semibold text-gray-700">
           Create Your Account
         </h2>
-        <form
-          class="space-y-5"
-          method="post"
-          onsubmit="return validatePasswords();"
-        >
+        <form id="signup-form" action="{% url 'core-signup' %}" class="space-y-5" method="POST" onsubmit="return validatePasswords()">
           {% csrf_token %}
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1"
@@ -155,6 +151,12 @@
               Passwords do not match
             </p>
           </div>
+          {% if user_signup_error %}
+            <p class="text-sm text-center text-danger">{{ user_signup_error }}</p>
+          {% endif %}
+          {% if admin_signup_error %}
+            <p class="text-sm text-center text-danger">{{ admin_signup_error }}</p>
+          {% endif %}
           <button
             type="submit"
             class="w-full bg-primary text-white rounded-lg py-2 font-semibold hover:bg-green-600 transition"
