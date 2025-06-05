@@ -174,7 +174,7 @@ def profile(request):
     }
     return render(request, "core/profile.html", context)
 
-def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_tokens=500, temperature=0.7):
+def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_tokens=300, temperature=0.7):
     """
     Utility function to make calls to OpenRouter API
     """

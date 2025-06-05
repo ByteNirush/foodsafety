@@ -8,3 +8,38 @@ ERROR 2025-06-05 13:42:38,605 views API request failed: 402 Client Error: Paymen
 ERROR 2025-06-05 13:42:38,606 views Response text: {"error":{"message":"This request requires more credits, or fewer max_tokens. You requested up to 500 tokens, but can only afford 470. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account","code":402,"metadata":{"provider_name":null}},"user_id":"user_2y2l0K8sbDi7qJ2cZ0BWCuIbISl"}
 ERROR 2025-06-05 13:42:38,606 views Error in get_response: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
 INFO 2025-06-05 13:46:10,707 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+INFO 2025-06-05 13:58:26,061 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+INFO 2025-06-05 13:58:48,998 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+INFO 2025-06-05 17:22:25,451 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:22:28,437 views API request failed: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:22:28,437 views Response text: {"error":{"message":"This request requires more credits, or fewer max_tokens. You requested up to 400 tokens, but can only afford 366. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account","code":402,"metadata":{"provider_name":null}},"user_id":"user_2y2l0K8sbDi7qJ2cZ0BWCuIbISl"}
+ERROR 2025-06-05 17:22:28,438 views Error in get_response: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+INFO 2025-06-05 17:23:16,277 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:23:17,386 views API request failed: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:23:17,387 views Response text: {"error":{"message":"This request requires more credits, or fewer max_tokens. You requested up to 400 tokens, but can only afford 364. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account","code":402,"metadata":{"provider_name":null}},"user_id":"user_2y2l0K8sbDi7qJ2cZ0BWCuIbISl"}
+ERROR 2025-06-05 17:23:17,387 views Error in get_response: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+INFO 2025-06-05 17:25:15,147 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:25:16,576 views API request failed: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:25:16,577 views Response text: {"error":{"message":"This request requires more credits, or fewer max_tokens. You requested up to 400 tokens, but can only afford 363. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account","code":402,"metadata":{"provider_name":null}},"user_id":"user_2y2l0K8sbDi7qJ2cZ0BWCuIbISl"}
+ERROR 2025-06-05 17:25:16,578 views Error in get_response: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+INFO 2025-06-05 17:25:21,059 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:25:22,720 views API request failed: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:25:22,721 views Response text: {"error":{"message":"This request requires more credits, or fewer max_tokens. You requested up to 400 tokens, but can only afford 363. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account","code":402,"metadata":{"provider_name":null}},"user_id":"user_2y2l0K8sbDi7qJ2cZ0BWCuIbISl"}
+ERROR 2025-06-05 17:25:22,721 views Error in get_response: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+INFO 2025-06-05 17:25:53,356 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:25:54,738 views API request failed: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:25:54,739 views Response text: {"error":{"message":"This request requires more credits, or fewer max_tokens. You requested up to 400 tokens, but can only afford 363. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account","code":402,"metadata":{"provider_name":null}},"user_id":"user_2y2l0K8sbDi7qJ2cZ0BWCuIbISl"}
+ERROR 2025-06-05 17:25:54,739 views Error in get_response: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+INFO 2025-06-05 17:30:19,363 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:30:19,551 views API request failed: 401 Client Error: Unauthorized for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:30:19,552 views Response text: {"error":{"message":"No auth credentials found","code":401}}
+ERROR 2025-06-05 17:30:19,552 views Error in get_response: 401 Client Error: Unauthorized for url: https://openrouter.ai/api/v1/chat/completions
+INFO 2025-06-05 17:30:27,755 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:30:27,852 views API request failed: 401 Client Error: Unauthorized for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:30:27,853 views Response text: {"error":{"message":"No auth credentials found","code":401}}
+ERROR 2025-06-05 17:30:27,853 views OpenRouter API request failed: 401 Client Error: Unauthorized for url: https://openrouter.ai/api/v1/chat/completions
+INFO 2025-06-05 17:31:46,784 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:31:47,899 views API request failed: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 17:31:47,899 views Response text: {"error":{"message":"This request requires more credits, or fewer max_tokens. You requested up to 400 tokens, but can only afford 362. To increase, visit https://openrouter.ai/settings/credits and upgrade to a paid account","code":402,"metadata":{"provider_name":null}},"user_id":"user_2y2l0K8sbDi7qJ2cZ0BWCuIbISl"}
+ERROR 2025-06-05 17:31:47,899 views Error in get_response: 402 Client Error: Payment Required for url: https://openrouter.ai/api/v1/chat/completions
+INFO 2025-06-05 17:32:41,653 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions

@@ -47,7 +47,7 @@ def get_response(request):
             result = call_openrouter_api(
                 messages=messages,
                 model="anthropic/claude-3-opus:beta",
-                max_tokens=400,
+                max_tokens=300,
                 temperature=0.7
             )
             
