@@ -33,70 +33,58 @@
     />
   </head>
   <body class="font-sans antialiased min-h-screen flex flex-col">
-    <!-- Login Page -->
+    <!-- Animated Food Fight Background -->
     <div
-      class="min-h-screen w-full flex items-center justify-center bg-gradient-to-bl from-green-100 via-yellow-50 to-red-50 relative"
+      class="min-h-screen w-full flex items-center justify-center bg-gradient-to-bl from-green-100 via-yellow-50 to-red-50 relative overflow-hidden"
     >
-      <div class="absolute inset-0 pointer-events-none">
-        <!-- Food safety/Nepalese market illustration SVG -->
-        <svg
-          class="absolute right-0 bottom-0 w-80 h-60 opacity-30"
-          fill="none"
-          viewBox="0 0 400 300"
-        >
-          <ellipse cx="200" cy="150" rx="180" ry="90" fill="#d1fae5" />
-          <g>
-            <rect
-              x="90"
-              y="180"
-              width="70"
-              height="40"
-              rx="12"
-              fill="#FFE066"
-            />
-            <circle cx="125" cy="200" r="18" fill="#FF6B6B" />
-            <rect
-              x="170"
-              y="170"
-              width="110"
-              height="50"
-              rx="14"
-              fill="#B7E4C7"
-            />
-            <rect
-              x="200"
-              y="185"
-              width="40"
-              height="20"
-              rx="8"
-              fill="#FFEDC2"
-            />
-            <rect
-              x="250"
-              y="180"
-              width="18"
-              height="25"
-              rx="6"
-              fill="#FFD166"
-            />
-          </g>
-        </svg>
-      </div>
+      <!-- Animated SVG Food Items -->
+      <svg
+        class="absolute animate-fly1 left-10 top-20 w-16 h-16 z-0"
+        viewBox="0 0 64 64"
+      >
+        <!-- Tomato -->
+        <circle cx="32" cy="32" r="20" fill="#FF6B6B" />
+        <ellipse cx="32" cy="22" rx="8" ry="4" fill="#4CAF50" />
+      </svg>
+      <svg
+        class="absolute animate-fly2 right-16 top-32 w-14 h-14 z-0"
+        viewBox="0 0 64 64"
+      >
+        <!-- Bread -->
+        <rect x="12" y="20" width="40" height="28" rx="12" fill="#FFE066" />
+        <ellipse cx="32" cy="20" rx="20" ry="10" fill="#FFD166" />
+      </svg>
+      <svg
+        class="absolute animate-fly3 left-1/2 bottom-10 w-12 h-12 z-0"
+        viewBox="0 0 64 64"
+      >
+        <!-- Cheese -->
+        <rect x="16" y="24" width="32" height="24" rx="8" fill="#FFD166" />
+        <circle cx="28" cy="36" r="3" fill="#FFEDC2" />
+        <circle cx="40" cy="44" r="2" fill="#FFEDC2" />
+      </svg>
+      <!-- End Animated SVGs -->
+
       <div
-        class="z-10 w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-8"
+        class="z-10 w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-8 relative"
       >
         <div class="flex items-center justify-center space-x-2">
           <img
             src="https://img.icons8.com/color/48/000000/cutting-board.png"
             alt="FreshGuard+"
-            class="w-10 h-10"
+            class="w-10 h-10 animate-spin-slow"
           />
           <h1 class="text-2xl font-bold text-primary">FreshGuard+</h1>
         </div>
         <h2 class="text-center text-lg font-semibold text-gray-700">
           Login to Your Account
         </h2>
-        <form id="login-form" action="{% url 'core-login' %}" class="space-y-5" method="POST">
+        <form
+          id="login-form"
+          action="{% url 'core-login' %}"
+          class="space-y-5"
+          method="POST"
+        >
           {% csrf_token %}
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1"
@@ -106,7 +94,7 @@
               <button
                 type="button"
                 onclick="setRole('admin')"
-                class="flex-1 p-2 bg-blue-100 rounded-lg font-semibold text-blue-700 flex items-center justify-center gap-2 hover:bg-blue-200"
+                class="flex-1 p-2 bg-blue-100 rounded-lg font-semibold text-blue-700 flex items-center justify-center gap-2 hover:bg-blue-200 transition-transform duration-200 ease-in-out transform hover:scale-105 active:scale-95 animate-bounce-short"
               >
                 <svg
                   class="w-5 h-5"
@@ -122,7 +110,7 @@
               <button
                 type="button"
                 onclick="setRole('public')"
-                class="flex-1 p-2 bg-red-100 rounded-lg font-semibold text-red-700 flex items-center justify-center gap-2 hover:bg-red-200"
+                class="flex-1 p-2 bg-red-100 rounded-lg font-semibold text-red-700 flex items-center justify-center gap-2 hover:bg-red-200 transition-transform duration-200 ease-in-out transform hover:scale-105 active:scale-95 animate-bounce-short"
               >
                 <svg
                   class="w-5 h-5"
@@ -139,7 +127,7 @@
                 Public
               </button>
             </div>
-            <input type="hidden" name="role" id="role" value="public">
+            <input type="hidden" name="role" id="role" value="public" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1"
@@ -165,14 +153,13 @@
             />
           </div>
           {% if user_login_error %}
-            <p class="text-sm text-center text-danger">{{ user_login_error }}</p>
-          {% endif %}
-          {% if admin_login_error %}
-            <p class="text-sm text-center text-danger">{{ admin_login_error }}</p>
+          <p class="text-sm text-center text-danger">{{ user_login_error }}</p>
+          {% endif %} {% if admin_login_error %}
+          <p class="text-sm text-center text-danger">{{ admin_login_error }}</p>
           {% endif %}
           <button
             type="submit"
-            class="w-full bg-primary text-white rounded-lg py-2 font-semibold hover:bg-green-600 transition"
+            class="w-full bg-primary text-white rounded-lg py-2 font-semibold hover:bg-green-600 transition-transform duration-200 ease-in-out transform hover:scale-105 active:scale-95 animate-bounce-short"
           >
             Login
           </button>
@@ -191,11 +178,96 @@
 
     <script>
       function setRole(role) {
-        document.getElementById('role').value = role;
+        document.getElementById("role").value = role;
       }
     </script>
 
     <style>
+      /* Food flying/fighting keyframes */
+      @keyframes fly1 {
+        0% {
+          transform: translateY(0) rotate(-10deg) scale(1);
+        }
+        30% {
+          transform: translateY(-40px) translateX(30px) rotate(10deg) scale(1.1);
+        }
+        60% {
+          transform: translateY(10px) translateX(-10px) rotate(-20deg)
+            scale(0.95);
+        }
+        100% {
+          transform: translateY(0) rotate(-10deg) scale(1);
+        }
+      }
+      @keyframes fly2 {
+        0% {
+          transform: translateY(0) rotate(10deg) scale(1);
+        }
+        25% {
+          transform: translateY(-30px) translateX(-20px) rotate(-10deg)
+            scale(1.05);
+        }
+        50% {
+          transform: translateY(20px) translateX(20px) rotate(20deg) scale(1.1);
+        }
+        100% {
+          transform: translateY(0) rotate(10deg) scale(1);
+        }
+      }
+      @keyframes fly3 {
+        0% {
+          transform: translateY(0) rotate(0deg) scale(1);
+        }
+        20% {
+          transform: translateY(-20px) translateX(10px) rotate(15deg)
+            scale(1.08);
+        }
+        60% {
+          transform: translateY(30px) translateX(-20px) rotate(-10deg)
+            scale(0.92);
+        }
+        100% {
+          transform: translateY(0) rotate(0deg) scale(1);
+        }
+      }
+      .animate-fly1 {
+        animation: fly1 4s ease-in-out infinite alternate;
+      }
+      .animate-fly2 {
+        animation: fly2 5s ease-in-out infinite alternate;
+      }
+      .animate-fly3 {
+        animation: fly3 3.5s ease-in-out infinite alternate;
+      }
+
+      /* Button bounce animation */
+      @keyframes bounce-short {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+      .animate-bounce-short {
+        animation: bounce-short 1.2s infinite;
+      }
+
+      /* Slow spin for logo */
+      @keyframes spin-slow {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .animate-spin-slow {
+        animation: spin-slow 8s linear infinite;
+      }
+
+      /* Dark mode styles (unchanged) */
       body.dark {
         background: #1a2233;
       }

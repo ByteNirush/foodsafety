@@ -107,6 +107,7 @@ INFO 2025-06-05 18:03:43,919 views Making request to OpenRouter API (attempt 1/3
 ERROR 2025-06-05 18:03:45,052 views Payment required: Insufficient credits
 INFO 2025-06-05 18:03:45,054 views Retrying with reduced tokens: 150
 INFO 2025-06-05 18:03:45,054 views Making request to OpenRouter API (attempt 1/3)
+<<<<<<< HEAD
 INFO 2025-06-05 21:10:01,439 views Making request to OpenRouter API (attempt 1/3)
 ERROR 2025-06-05 21:10:05,931 views Payment required: Insufficient credits
 INFO 2025-06-05 21:10:05,931 views Retrying with reduced tokens: 150
@@ -131,3 +132,146 @@ ERROR 2025-06-05 21:10:34,687 views Unexpected error: Insufficient credits. Plea
 ERROR 2025-06-05 21:10:34,687 views Unexpected error: An unexpected error occurred. Please try again later.
 ERROR 2025-06-05 21:10:34,688 views Unexpected error: An unexpected error occurred. Please try again later.
 ERROR 2025-06-05 21:10:34,689 views Error in get_response: An unexpected error occurred. Please try again later.
+=======
+INFO 2025-06-05 18:05:59,684 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:06:01,830 views Payment required: Insufficient credits
+INFO 2025-06-05 18:06:01,831 views Retrying with reduced tokens: 150
+INFO 2025-06-05 18:06:01,831 views Making request to OpenRouter API (attempt 1/3)
+INFO 2025-06-05 18:06:41,536 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:06:43,384 views Payment required: Insufficient credits
+INFO 2025-06-05 18:06:43,385 views Retrying with reduced tokens: 150
+INFO 2025-06-05 18:06:43,386 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:06:44,539 views Payment required: Insufficient credits
+INFO 2025-06-05 18:06:44,540 views Retrying with reduced tokens: 100
+INFO 2025-06-05 18:06:44,541 views Making request to OpenRouter API (attempt 1/3)
+INFO 2025-06-05 18:07:00,415 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:07:01,551 views Payment required: Insufficient credits
+INFO 2025-06-05 18:07:01,552 views Retrying with reduced tokens: 150
+INFO 2025-06-05 18:07:01,552 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:07:02,775 views Payment required: Insufficient credits
+INFO 2025-06-05 18:07:02,776 views Retrying with reduced tokens: 100
+INFO 2025-06-05 18:07:02,777 views Making request to OpenRouter API (attempt 1/3)
+INFO 2025-06-05 18:08:50,975 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:08:53,053 views Payment required: Insufficient credits
+INFO 2025-06-05 18:08:53,054 views Retrying with reduced tokens: 150
+INFO 2025-06-05 18:08:53,055 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:08:54,160 views Payment required: Insufficient credits
+INFO 2025-06-05 18:08:54,161 views Retrying with reduced tokens: 100
+INFO 2025-06-05 18:08:54,162 views Making request to OpenRouter API (attempt 1/3)
+INFO 2025-06-05 18:10:04,819 views Making request to OpenRouter API (attempt 1/3)
+INFO 2025-06-05 18:10:13,853 views Making request to OpenRouter API (attempt 1/3)
+INFO 2025-06-05 18:16:36,414 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:16:38,599 views Payment required: Insufficient credits
+INFO 2025-06-05 18:16:38,601 views Retrying with reduced tokens: 150
+INFO 2025-06-05 18:16:38,602 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:16:39,681 views Payment required: Insufficient credits
+INFO 2025-06-05 18:16:39,682 views Retrying with reduced tokens: 100
+INFO 2025-06-05 18:16:39,683 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:16:40,755 views Payment required: Insufficient credits
+ERROR 2025-06-05 18:16:40,755 views Unexpected error: Insufficient credits. Please add credits to your OpenRouter account.
+ERROR 2025-06-05 18:16:40,756 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:16:40,757 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:16:40,757 views Error in get_response: An unexpected error occurred. Please try again later.
+INFO 2025-06-05 18:17:04,523 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:17:05,677 views Payment required: Insufficient credits
+INFO 2025-06-05 18:17:05,678 views Retrying with reduced tokens: 150
+INFO 2025-06-05 18:17:05,679 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:17:06,792 views Payment required: Insufficient credits
+INFO 2025-06-05 18:17:06,792 views Retrying with reduced tokens: 100
+INFO 2025-06-05 18:17:06,793 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:17:07,922 views Payment required: Insufficient credits
+ERROR 2025-06-05 18:17:07,923 views Unexpected error: Insufficient credits. Please add credits to your OpenRouter account.
+ERROR 2025-06-05 18:17:07,924 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:17:07,924 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:17:07,925 views Error in get_response: An unexpected error occurred. Please try again later.
+INFO 2025-06-05 18:17:22,866 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:17:24,077 views Payment required: Insufficient credits
+INFO 2025-06-05 18:17:24,078 views Retrying with reduced tokens: 150
+INFO 2025-06-05 18:17:24,078 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:17:25,287 views Payment required: Insufficient credits
+INFO 2025-06-05 18:17:25,288 views Retrying with reduced tokens: 100
+INFO 2025-06-05 18:17:25,289 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:17:26,418 views Payment required: Insufficient credits
+ERROR 2025-06-05 18:17:26,419 views Unexpected error: Insufficient credits. Please add credits to your OpenRouter account.
+ERROR 2025-06-05 18:17:26,420 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:17:26,420 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:17:26,421 views Error in get_response: An unexpected error occurred. Please try again later.
+INFO 2025-06-05 18:18:45,654 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:18:47,760 views Payment required: Insufficient credits
+INFO 2025-06-05 18:18:47,761 views Retrying with reduced tokens: 150
+INFO 2025-06-05 18:18:47,762 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:18:48,863 views Payment required: Insufficient credits
+INFO 2025-06-05 18:18:48,864 views Retrying with reduced tokens: 100
+INFO 2025-06-05 18:18:48,865 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:18:49,987 views Payment required: Insufficient credits
+ERROR 2025-06-05 18:18:49,988 views Unexpected error: Insufficient credits. Please add credits to your OpenRouter account.
+ERROR 2025-06-05 18:18:49,988 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:18:49,989 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:18:49,989 views Error in get_response: An unexpected error occurred. Please try again later.
+INFO 2025-06-05 18:20:00,883 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:20:02,902 views Payment required: Insufficient credits
+INFO 2025-06-05 18:20:02,903 views Retrying with reduced tokens: 150
+INFO 2025-06-05 18:20:02,903 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:20:04,079 views Payment required: Insufficient credits
+INFO 2025-06-05 18:20:04,080 views Retrying with reduced tokens: 100
+INFO 2025-06-05 18:20:04,080 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:20:05,234 views Payment required: Insufficient credits
+ERROR 2025-06-05 18:20:05,235 views Unexpected error: Insufficient credits. Please add credits to your OpenRouter account.
+ERROR 2025-06-05 18:20:05,235 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:20:05,236 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:20:05,236 views Error in get_response: An unexpected error occurred. Please try again later.
+INFO 2025-06-05 18:20:47,786 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:20:49,634 views Payment required: Insufficient credits
+INFO 2025-06-05 18:20:49,635 views Retrying with reduced tokens: 150
+INFO 2025-06-05 18:20:49,636 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:20:50,715 views Payment required: Insufficient credits
+INFO 2025-06-05 18:20:50,716 views Retrying with reduced tokens: 100
+INFO 2025-06-05 18:20:50,717 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 18:20:51,816 views Payment required: Insufficient credits
+ERROR 2025-06-05 18:20:51,817 views Unexpected error: Insufficient credits. Please add credits to your OpenRouter account.
+ERROR 2025-06-05 18:20:51,817 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:20:51,818 views Unexpected error: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 18:20:51,818 views Error in get_response: An unexpected error occurred. Please try again later.
+INFO 2025-06-05 21:35:17,252 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 21:35:18,251 views Authentication failed: Invalid or expired API key
+ERROR 2025-06-05 21:35:18,252 views Unexpected error: Authentication failed. Please check your API key configuration.
+ERROR 2025-06-05 21:35:18,253 views Error in get_response: An unexpected error occurred. Please try again later.
+ERROR 2025-06-05 21:35:33,136 views OpenRouter API request failed: 401 Client Error: Unauthorized for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 21:35:33,137 views API response: {"error":{"message":"No auth credentials found","code":401}}
+ERROR 2025-06-05 21:36:53,010 views OpenRouter API request failed: 401 Client Error: Unauthorized for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 21:36:53,012 views API response: {"error":{"message":"No auth credentials found","code":401}}
+INFO 2025-06-05 21:37:04,987 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 21:37:05,501 views Authentication failed: Invalid or expired API key
+ERROR 2025-06-05 21:37:05,503 views Unexpected error: Authentication failed. Please check your API key configuration.
+ERROR 2025-06-05 21:37:05,503 views Error in get_response: An unexpected error occurred. Please try again later.
+INFO 2025-06-05 21:48:31,295 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 21:48:32,840 views Authentication failed: Invalid or expired API key
+ERROR 2025-06-05 21:48:32,841 views Unexpected error: Authentication failed. Please check your API key configuration.
+ERROR 2025-06-05 21:48:32,842 views Error in get_response: An unexpected error occurred. Please try again later.
+INFO 2025-06-05 21:48:39,761 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 21:48:40,608 views Authentication failed: Invalid or expired API key
+ERROR 2025-06-05 21:48:40,609 views Unexpected error: Authentication failed. Please check your API key configuration.
+ERROR 2025-06-05 21:48:40,610 views Chatbot API error: An unexpected error occurred. Please try again later.
+INFO 2025-06-05 21:59:35,025 views Making request to OpenRouter API: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 21:59:36,747 views API request failed: 401 Client Error: Unauthorized for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 21:59:36,748 views Response text: {"error":{"message":"No auth credentials found","code":401}}
+ERROR 2025-06-05 21:59:36,749 views Error in get_response: 401 Client Error: Unauthorized for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 21:59:45,317 views OpenRouter API request failed: 401 Client Error: Unauthorized for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 21:59:45,318 views API response: {"error":{"message":"No auth credentials found","code":401}}
+ERROR 2025-06-05 22:01:16,140 views OpenRouter API request failed: 401 Client Error: Unauthorized for url: https://openrouter.ai/api/v1/chat/completions
+ERROR 2025-06-05 22:01:16,142 views API response: {"error":{"message":"No auth credentials found","code":401}}
+INFO 2025-06-05 22:01:23,648 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 22:01:24,680 views Authentication failed: Invalid or expired API key
+ERROR 2025-06-05 22:01:24,681 views Unexpected error: Authentication failed. Please check your API key configuration.
+ERROR 2025-06-05 22:01:24,681 views Error in get_response: Authentication failed. Please check your API key configuration.
+INFO 2025-06-05 22:02:24,320 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 22:02:24,690 views Authentication failed: Invalid or expired API key
+ERROR 2025-06-05 22:02:24,692 views Unexpected error: Authentication failed. Please check your API key configuration.
+ERROR 2025-06-05 22:02:24,693 views Error in get_response: Authentication failed. Please check your API key configuration.
+INFO 2025-06-05 22:05:31,991 views Making request to OpenRouter API (attempt 1/3)
+ERROR 2025-06-05 22:05:32,949 views Authentication failed: Invalid or expired API key
+ERROR 2025-06-05 22:05:32,950 views Unexpected error: Authentication failed. Please check your API key configuration.
+ERROR 2025-06-05 22:05:32,950 views Error in get_response: Authentication failed. Please check your API key configuration.
+INFO 2025-06-05 22:09:43,558 views Making request to OpenRouter API (attempt 1/3)
+INFO 2025-06-05 22:10:05,059 views Making request to OpenRouter API (attempt 1/3)
+>>>>>>> fa52fcedb942487e6684bf3068d8d794980c04d9
