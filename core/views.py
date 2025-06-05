@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from omegaconf import ValidationError
 import requests
+from datetime import timedelta
+from django.utils import timezone
 
 from foodsafety import settings
 from .models import CustomUser, Donation, Product, CommunityReport, Comment
@@ -110,30 +112,46 @@ def logout_view(request):
     return redirect('index')
 
 def donation_portal_dashboard(request):
-    # Optional: implement search
     search_query = request.GET.get('search', '')
     if search_query:
-        products = Product.objects.filter(user=request.user, name__icontains=search_query).order_by('expire_date')
+        products = Product.objects.filter(
+            user=request.user,
+            name__icontains=search_query,
+            status='Available'
+        ).order_by('expire_date')
     else:
-        products = Product.objects.filter(user=request.user).order_by('expire_date')
+        products = Product.objects.filter(
+            user=request.user,
+            status='Available'
+        ).order_by('expire_date')
     total_products = products.count()
     third = total_products // 3
     red_end = third
     yellow_end = third * 2
+
+    # Expiring soon: count of products in the "red" section
+    expiring_soon_count = red_end
+
+    # Recently Donated: count of donations in the last 7 days
+    last_week = timezone.now() - timedelta(days=7)
+    donation_count = Donation.objects.filter(
+        user=request.user,
+        created_at__gte=last_week
+    ).count()
+
     context = {
         'products': products,
         'red_end': red_end,
         'yellow_end': yellow_end,
+        'expiring_soon_count': expiring_soon_count,
+        'donation_count': donation_count,
     }
     return render(request, 'core/donation_portal_dashboard.html', context)
 @login_required
 def donation_create(request, product_id):
-    # Fetch the product or return 404 if not found
     product = get_object_or_404(Product, id=product_id)
-    
     if request.method == 'POST':
         try:
-            # Extract form data
             donor_name = request.POST.get('donor_name')
             contact_email = request.POST.get('contact_email')
             contact_number = request.POST.get('contact')
@@ -141,29 +159,30 @@ def donation_create(request, product_id):
             pickup_datetime = request.POST.get('pickup_datetime')
             notes = request.POST.get('notes', '')
 
-            # Create and save the donation
             donation = Donation(
                 user=request.user,
                 product=product,
-                donor_name=donor_name,         # <-- Correct field
-                contact_email=contact_email,   # <-- Correct field
+                donor_name=donor_name,
+                contact_email=contact_email,
                 contact_number=contact_number,
                 pickup_address=pickup_address,
                 pickup_datetime=pickup_datetime,
                 notes=notes
             )
-            donation.full_clean()  # Run model validation
+            donation.full_clean()
             donation.save()
 
+            product.status = 'Donated'
+            product.save()
+
             messages.success(request, f"Donation of {product.name} successfully submitted!")
-            return redirect('core-donation_portal_dashboard')
+            return redirect('donation-history')  # Redirect to donation history
 
         except ValidationError as e:
             messages.error(request, f"Error: {', '.join(e.messages)}")
             return render(request, 'core/donation_details.html', {'product': product})
 
-    # GET request: Render the form
-    return render(request, 'core/donation_portal_dashboard.html', {'product': product})
+    return render(request, 'core/donation_details.html', {'product': product})
 
 def add_product(request):
     if request.method == 'POST':
@@ -326,3 +345,11 @@ def delete_community_report(request, report_id):
     if request.user.is_superuser or report.reporter_name == request.user.get_full_name() or report.reporter_name == request.user.username:
         report.delete()
     return redirect('core-community_watch')
+
+from django.contrib.auth.decorators import login_required
+from .models import Donation
+
+@login_required
+def donation_history(request):
+    donations = Donation.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'core/donation_history.html', {'donations': donations})

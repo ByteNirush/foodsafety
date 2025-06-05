@@ -73,6 +73,29 @@
       </div>
     </div>
 
+
+    <!-- Back to Donation Portal Link -->
+    <div class="max-w-2xl mx-auto mt-6 px-4">
+      <a
+        href="{% url 'core-donation_portal_dashboard' %}"
+        class="inline-flex items-center text-primary hover:underline font-semibold mb-4"
+      >
+        <svg
+          class="w-5 h-5 mr-2"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+        Back to Donation Portal
+      </a>
+    </div>
     <!-- Main Content -->
     <div
       class="w-full max-w-md glass rounded-2xl shadow-xl p-8 space-y-8 mt-24 mx-auto fade-in"
@@ -93,7 +116,7 @@
         </svg>
         Donation Details for {{ product.name }}
       </h2>
-      <form method="post" autocomplete="on">
+      <form method="POST" action="{% url 'donation-create' product.id %}">
         {% csrf_token %}
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1"

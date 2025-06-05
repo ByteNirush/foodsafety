@@ -22,4 +22,5 @@ urlpatterns = [
     path('donation/<int:product_id>/', views.donation_create, name='donation-create'),
     path('community-watch/comment/<int:report_id>/', views.add_comment, name='add-comment'),
     path('community-watch/delete/<int:report_id>/', views.delete_community_report, name='delete-community-report'),
+    path('donation-history/', views.donation_history, name='donation-history'),
 ]
