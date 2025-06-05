@@ -8,6 +8,8 @@ import requests
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import logging
+import time
+from requests.exceptions import RequestException
 
 from foodsafety import settings
 from .models import CustomUser, Product, CommunityReport, Comment
@@ -174,35 +176,88 @@ def profile(request):
     }
     return render(request, "core/profile.html", context)
 
-def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_tokens=300, temperature=0.7):
+def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_tokens=300, temperature=0.7, max_retries=3):
     """
-    Utility function to make calls to OpenRouter API
+    Utility function to make calls to OpenRouter API with retry mechanism and better error handling
     """
-    try:
-        url = settings.OPENROUTER_API_URL
-        headers = {
-            "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "http://localhost:8000",
-            "X-Title": "FreshGuard+ Food Safety Assistant"
-        }
+    url = settings.OPENROUTER_API_URL
+    headers = {
+        "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost:8000",
+        "X-Title": "FreshGuard+ Food Safety Assistant"
+    }
+    
+    payload = {
+        "model": model,
+        "messages": messages,
+        "max_tokens": max_tokens,
+        "temperature": temperature
+    }
+    
+    retry_count = 0
+    base_delay = 1  # Base delay in seconds
+    
+    while retry_count < max_retries:
+        try:
+            logger.info(f"Making request to OpenRouter API (attempt {retry_count + 1}/{max_retries})")
+            response = requests.post(url, json=payload, headers=headers, timeout=30)
+            
+            # Check for specific error status codes
+            if response.status_code == 401:
+                logger.error("Authentication failed: Invalid or expired API key")
+                raise Exception("Authentication failed. Please check your API key configuration.")
+            
+            elif response.status_code == 402:
+                logger.error("Payment required: Insufficient credits")
+                raise Exception("Insufficient credits. Please add credits to your OpenRouter account.")
+            
+            elif response.status_code == 429:
+                logger.warning("Rate limit exceeded. Retrying with backoff...")
+                retry_count += 1
+                if retry_count < max_retries:
+                    delay = base_delay * (2 ** retry_count)  # Exponential backoff
+                    time.sleep(delay)
+                    continue
+                raise Exception("Rate limit exceeded. Please try again later.")
+            
+            response.raise_for_status()
+            return response.json()
+            
+        except RequestException as e:
+            logger.error(f"API request failed (attempt {retry_count + 1}/{max_retries}): {str(e)}")
+            if hasattr(e, 'response') and e.response is not None:
+                logger.error(f"Response text: {e.response.text}")
+            
+            retry_count += 1
+            if retry_count < max_retries:
+                delay = base_delay * (2 ** retry_count)
+                logger.info(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                raise Exception("Failed to connect to AI service after multiple attempts. Please try again later.")
         
-        payload = {
-            "model": model,
-            "messages": messages,
-            "max_tokens": max_tokens,
-            "temperature": temperature
-        }
-        
-        logger.info(f"Making request to OpenRouter API: {url}")
-        response = requests.post(url, json=payload, headers=headers, timeout=30)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        logger.error(f"API request failed: {str(e)}")
-        if hasattr(e, 'response') and e.response is not None:
-            logger.error(f"Response text: {e.response.text}")
-        raise
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            raise Exception("An unexpected error occurred. Please try again later.")
+
+def get_fallback_response():
+    """
+    Returns a fallback response when the AI service is unavailable
+    """
+    return {
+        "choices": [{
+            "message": {
+                "content": "I apologize, but I'm currently unable to process your request. This could be due to:\n\n" +
+                          "1. Temporary service interruption\n" +
+                          "2. High server load\n" +
+                          "3. Network connectivity issues\n\n" +
+                          "Please try again in a few moments. If the problem persists, you can:\n" +
+                          "- Check your internet connection\n" +
+                          "Contact support if the issue continues"
+            }
+        }]
+    }
 
 @login_required
 def check_safety(request):
