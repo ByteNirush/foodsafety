@@ -1,13 +1,14 @@
 import json
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from omegaconf import ValidationError
 import requests
 
 from foodsafety import settings
-from .models import CustomUser, Donation, Product
+from .models import CustomUser, Donation, Product, CommunityReport, Comment
 
 def index(request):
     return render(request, 'core/login.html')
@@ -70,7 +71,23 @@ def dashboard(request):
 
 @login_required
 def community_watch(request):
-    return render(request, 'core/community_watch.html')
+    if request.method == 'POST':
+        # Save the new report
+        CommunityReport.objects.create(
+            reporter_name=request.POST.get('reporter_name'),
+            item_name=request.POST.get('item_name'),
+            location=request.POST.get('location'),
+            issue_type=request.POST.get('issue_type'),
+            description=request.POST.get('description'),
+            photo=request.FILES.get('photo')
+        )
+        return redirect('core-community_watch')  # Redirect to clear POST and avoid resubmission
+
+    reports = CommunityReport.objects.all().order_by('-created_at')
+    return render(request, 'core/community_watch.html', {
+        'reports': reports,
+        'user': request.user,
+    })
 
 @login_required
 def ai_waste_dashboard(request):
@@ -96,9 +113,9 @@ def donation_portal_dashboard(request):
     # Optional: implement search
     search_query = request.GET.get('search', '')
     if search_query:
-        products = Product.objects.filter(name__icontains=search_query).order_by('expire_date')
+        products = Product.objects.filter(user=request.user, name__icontains=search_query).order_by('expire_date')
     else:
-        products = Product.objects.all().order_by('expire_date')
+        products = Product.objects.filter(user=request.user).order_by('expire_date')
     total_products = products.count()
     third = total_products // 3
     red_end = third
@@ -109,16 +126,44 @@ def donation_portal_dashboard(request):
         'yellow_end': yellow_end,
     }
     return render(request, 'core/donation_portal_dashboard.html', context)
-
-def submit_donation(request):
+@login_required
+def donation_create(request, product_id):
+    # Fetch the product or return 404 if not found
+    product = get_object_or_404(Product, id=product_id)
+    
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        food_items = request.POST.get('food_items')
-        pickup_location = request.POST.get('pickup_location')
-        messages.success(request, 'Donation submitted successfully!')
-        return redirect('core-donation_portal_dashboard')
-    return redirect('core/donation_portal_dashboard.html')
+        try:
+            # Extract form data
+            donor_name = request.POST.get('donor_name')
+            contact_email = request.POST.get('contact_email')
+            contact_number = request.POST.get('contact')
+            pickup_address = request.POST.get('address')
+            pickup_datetime = request.POST.get('pickup_datetime')
+            notes = request.POST.get('notes', '')
+
+            # Create and save the donation
+            donation = Donation(
+                user=request.user,
+                product=product,
+                donor_name=donor_name,         # <-- Correct field
+                contact_email=contact_email,   # <-- Correct field
+                contact_number=contact_number,
+                pickup_address=pickup_address,
+                pickup_datetime=pickup_datetime,
+                notes=notes
+            )
+            donation.full_clean()  # Run model validation
+            donation.save()
+
+            messages.success(request, f"Donation of {product.name} successfully submitted!")
+            return redirect('core-donation_portal_dashboard')
+
+        except ValidationError as e:
+            messages.error(request, f"Error: {', '.join(e.messages)}")
+            return render(request, 'core/donation_details.html', {'product': product})
+
+    # GET request: Render the form
+    return render(request, 'core/donation_portal_dashboard.html', {'product': product})
 
 def add_product(request):
     if request.method == 'POST':
@@ -139,30 +184,6 @@ def add_product(request):
         return redirect('core-donation_portal_dashboard')
     return redirect('core/donation_portal_dashboard.html')
 
-
-def donate_product(request, product_id):
-    if not request.user.is_authenticated:
-        messages.error(request, 'Please log in to donate a product.')
-        return redirect('login')
-
-    product = get_object_or_404(Product, id=product_id, user=request.user)
-    if request.method == 'POST':
-        try:
-            product.status = 'Donated'
-            product.save()
-            Donation.objects.create(
-                user=request.user,
-                product=product,
-                name=request.user.get_full_name() or request.user.username,
-                email=request.user.email,
-                food_items=product.name,
-                pickup_location=request.user.address or 'Not specified'
-            )
-            messages.success(request, f'{product.name} marked as donated!')
-        except Exception as e:
-            messages.error(request, f'Error donating product: {str(e)}')
-        return redirect('core-donation_portal_dashboard')
-    return render(request, 'core/confirm_donate.html', {'product': product})
 
 def throw_product(request, product_id):
     if not request.user.is_authenticated:
@@ -268,3 +289,40 @@ def check_safety(request):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
+def donation_details(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    if request.method == 'POST':
+        # Process donation details here
+        # ...
+        return redirect('core-donation_portal_dashboard')
+    return render(request, 'core/donation_details.html', {'product': product})
+
+def delete_product(request, product_id):
+    if request.method == 'POST':
+        product = get_object_or_404(Product, id=product_id)
+        product.delete()
+        messages.success(request, 'Product deleted successfully!')
+    return redirect('core-donation_portal_dashboard')
+
+def add_comment(request, report_id):
+    if request.method == 'POST':
+        report = get_object_or_404(CommunityReport, id=report_id)
+        text = request.POST.get('comment')
+        if text and request.user.is_authenticated:
+            Comment.objects.create(
+                report=report,
+                user=request.user,
+                text=text
+            )
+    return redirect('core-community_watch')
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from .models import CommunityReport
+
+@login_required
+def delete_community_report(request, report_id):
+    report = get_object_or_404(CommunityReport, id=report_id)
+    if request.user.is_superuser or report.reporter_name == request.user.get_full_name() or report.reporter_name == request.user.username:
+        report.delete()
+    return redirect('core-community_watch')
