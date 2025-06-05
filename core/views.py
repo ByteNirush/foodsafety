@@ -13,7 +13,9 @@ from foodsafety import settings
 from .models import CustomUser, Donation, Product, CommunityReport, Comment
 
 def index(request):
-    return render(request, 'core/login.html')
+    if request.user.is_authenticated:
+        return redirect('core-dashboard')  # or 'core-donation_portal_dashboard'
+    return render(request, 'core/landing.html')  # Create this template for your landing page
 
 def user_login(request):
     if request.method == 'POST':
@@ -111,6 +113,7 @@ def logout_view(request):
     logout(request)
     return redirect('index')
 
+@login_required
 def donation_portal_dashboard(request):
     search_query = request.GET.get('search', '')
     if search_query:
