@@ -113,30 +113,6 @@
       <!-- Feature 4 -->
       <div
         class="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:shadow-2xl transition cursor-pointer"
-        onclick="window.location.href='{% if user.is_authenticated %}{% url 'core-impact_analytics_dashboard' %}{% else %}{% url 'core-login' %}{% endif %}'"
-      >
-        <div class="bg-purple-100 rounded-full p-4 mb-4">
-          <svg
-            class="w-8 h-8 text-purple-500"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path d="M3 3v18h18V3H3zm3 3h12v12H6V6zm3 3v6h6V9H9z" />
-          </svg>
-        </div>
-        <h3 class="text-lg font-semibold mb-2 text-purple-600 text-center">
-          Impact Analytics Dashboard
-        </h3>
-        <p class="text-gray-600 text-center">
-          Visualize your food safety, waste reduction, and donation impact with
-          real-time analytics.
-        </p>
-      </div>
-      <!-- Feature 5 -->
-      <div
-        class="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:shadow-2xl transition cursor-pointer"
         onclick="window.location.href='{% if user.is_authenticated %}{% url 'core-community_watch' %}{% else %}{% url 'core-login' %}{% endif %}'"
       >
         <div class="bg-red-100 rounded-full p-4 mb-4">

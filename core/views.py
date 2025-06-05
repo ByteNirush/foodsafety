@@ -8,8 +8,8 @@ from omegaconf import ValidationError
 import requests
 from datetime import timedelta
 from django.utils import timezone
-
-from foodsafety import settings
+from django.contrib.auth.decorators import user_passes_test
+from django.db.models import Count, Sum
 from .models import CustomUser, Donation, Product, CommunityReport, Comment
 
 def index(request):
@@ -24,12 +24,15 @@ def user_login(request):
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
-            next_url = request.GET.get('next', 'core-dashboard' if not user.is_admin else 'core-admin_dashboard')
+            # Redirect admin (superuser or staff) to impact analytics dashboard
+            if user.is_superuser or user.is_staff:
+                return redirect('core-impact_analytics_dashboard')
+            # Otherwise, redirect to normal dashboard
+            next_url = request.GET.get('next', 'core-dashboard')
             return redirect(next_url)
         else:
             return render(request, 'core/login.html', {
-                'user_login_error': 'Invalid email or password' if not user or not user.is_admin else None,
-                'admin_login_error': 'Invalid admin email or password' if user and user.is_admin else None
+                'user_login_error': 'Invalid email or password'
             })
     return render(request, 'core/login.html')
 
@@ -101,9 +104,51 @@ def ai_waste_dashboard(request):
 def ingredient_scanner_dashboard(request):
     return render(request, 'core/ingredient_scanner_dashboard.html')
 
-@login_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff or getattr(u, 'is_admin', False))
 def impact_analytics_dashboard(request):
-    return render(request, 'core/impact_analytics_dashboard.html')
+    # Total food waste reduced (sum of donated product weights)
+    food_waste_reduced = Product.objects.filter(status='Donated').count()
+    # Total donations matched
+    donations_matched = Donation.objects.count()
+
+    # Total community reports
+    community_reports = CommunityReport.objects.count()
+
+    # Safe ingredients scanned (replace with your logic if you have a model for scans)
+    safe_ingredients_scanned = 26  # Placeholder, update if you track scans
+
+    # Expiry trends (example: number of products expiring each day for the last 7 days)
+    from django.utils import timezone
+    from datetime import timedelta
+    today = timezone.now().date()
+    expiry_trends = [
+        Product.objects.filter(expire_date=today - timedelta(days=i)).count()
+        for i in reversed(range(7))
+    ]
+
+    # Status breakdown
+    status_breakdown = {
+        'Available': Product.objects.filter(status='Available').count(),
+        'Donated': Product.objects.filter(status='Donated').count(),
+        'Thrown': Product.objects.filter(status='Thrown').count(),
+    }
+
+    # Flags by type (if you have a 'flag' field, otherwise skip or adjust)
+    flags_by_type = {
+        'Expired': Product.objects.filter(expire_date__lt=today, status='Available').count(),
+        # Add more flag logic if you have more flag types
+    }
+
+    context = {
+        'food_waste_reduced': food_waste_reduced,
+        'donations_matched': donations_matched,
+        'community_reports': community_reports,
+        'safe_ingredients_scanned': safe_ingredients_scanned,
+        'expiry_trends': expiry_trends,
+        'status_breakdown': status_breakdown,
+        'flags_by_type': flags_by_type,
+    }
+    return render(request, 'core/impact_analytics_dashboard.html', context)
 
 @login_required
 def admin_dashboard(request):
