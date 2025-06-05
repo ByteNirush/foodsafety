@@ -5,9 +5,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 import requests
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import logging
 
 from foodsafety import settings
 from .models import CustomUser, Product, CommunityReport, Comment
+
+logger = logging.getLogger(__name__)
 
 def index(request):
     return render(request, 'core/login.html')
@@ -169,6 +174,36 @@ def profile(request):
     }
     return render(request, "core/profile.html", context)
 
+def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_tokens=500, temperature=0.7):
+    """
+    Utility function to make calls to OpenRouter API
+    """
+    try:
+        url = settings.OPENROUTER_API_URL
+        headers = {
+            "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:8000",
+            "X-Title": "FreshGuard+ Food Safety Assistant"
+        }
+        
+        payload = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+        
+        logger.info(f"Making request to OpenRouter API: {url}")
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"API request failed: {str(e)}")
+        if hasattr(e, 'response') and e.response is not None:
+            logger.error(f"Response text: {e.response.text}")
+        raise
+
 @login_required
 def check_safety(request):
     if request.method == 'POST':
@@ -178,42 +213,33 @@ def check_safety(request):
             expiration = data.get('expiration')
             conditions = data.get('conditions')
 
-            # OpenRouter API call
-            url = "https://openrouter.ai/api/v1/chat/completions"
-            headers = {
-                "Authorization": f"Bearer {'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'}",
-                "Content-Type": "application/json"
-            }
-            payload = {
-                "model": "meta-llama/llama-3.1-8b-instruct",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a food safety expert. Provide a concise safety assessment for the given product"
-                            "based on the user's medical condition. Return JSON with 'status' (Safe, Caution, Risky), "
-                            "'score' (0-100), and 'explanation'. Use double quotes for all strings."
-                        )
-                    },
-                    {
-                        "role": "user",
-                        "content": (
-                            f"Assess the safety of {ingredient} for someone with {conditions}. "
-                            f"Expiration date: {expiration or 'not provided'}. "
-                            "Return the response in JSON format with 'status', 'score', and 'explanation' fields. "
-                            "Use double quotes for all strings."
-                        )
-                    }
-                ],
-                "max_tokens": 200,
-                "temperature": 0.2,
-                "top_p": 0.9
-            }
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a food safety expert. Provide a concise safety assessment for the given product"
+                        "based on the user's medical condition. Return JSON with 'status' (Safe, Caution, Risky), "
+                        "'score' (0-100), and 'explanation'. Use double quotes for all strings."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"Assess the safety of {ingredient} for someone with {conditions}. "
+                        f"Expiration date: {expiration or 'not provided'}. "
+                        "Return the response in JSON format with 'status', 'score', and 'explanation' fields. "
+                        "Use double quotes for all strings."
+                    )
+                }
+            ]
 
             try:
-                response = requests.post(url, json=payload, headers=headers, timeout=10)
-                response.raise_for_status()
-                result = response.json()
+                result = call_openrouter_api(
+                    messages=messages,
+                    model="meta-llama/llama-3.1-8b-instruct",
+                    max_tokens=150,
+                    temperature=0.2
+                )
 
                 # Parse and normalize response
                 api_response = result.get('choices', [{}])[0].get('message', {}).get('content', '{}')
@@ -230,7 +256,7 @@ def check_safety(request):
                     item['ingredient'] = ingredient
 
                 return JsonResponse(safety_response, safe=False)
-            except requests.exceptions.RequestException as e:
+            except Exception as e:
                 return JsonResponse({
                     "error": f"API request failed: {str(e)}"
                 }, status=500)
@@ -276,3 +302,158 @@ def delete_community_report(request, report_id):
     if request.user.is_superuser or report.reporter_name == request.user.get_full_name() or report.reporter_name == request.user.username:
         report.delete()
     return redirect('core-community_watch')
+
+@login_required
+def get_response(request):
+    if request.method == 'POST':
+        message = request.POST.get('message', '')
+        if not message:
+            return JsonResponse({'error': 'No message provided'}, status=400)
+
+        try:
+            # OpenRouter API endpoint
+            url = settings.OPENROUTER_API_URL
+            
+            # Log the request details (excluding sensitive data)
+            logger.info(f"Making request to OpenRouter API: {url}")
+            
+            # Headers with API key
+            headers = {
+                'Authorization': f'Bearer {settings.OPENROUTER_API_KEY}',
+                'Content-Type': 'application/json',
+                'HTTP-Referer': request.build_absolute_uri('/'),
+                'X-Title': 'FreshGuard+ Food Safety Assistant'
+            }
+            
+            # Prepare the messages array
+            messages = [
+                {
+                    "role": "system",
+                    "content": """You are a Food Safety Assistant, an expert in food safety, handling, and regulations. 
+                    Your role is to provide accurate, helpful information about:
+                    - Food handling and storage best practices
+                    - Food safety regulations and compliance
+                    - Preventing foodborne illnesses
+                    - Restaurant food safety guidelines
+                    - Home food safety tips
+                    - Food waste reduction
+                    - Food safety certifications
+                    - Food safety training requirements
+                    
+                    Always provide practical, actionable advice and cite relevant regulations when applicable.
+                    If you're unsure about something, acknowledge the limitation and suggest consulting a food safety expert."""
+                },
+                {
+                    "role": "user",
+                    "content": message
+                }
+            ]
+            
+            # Log the request payload (excluding sensitive data)
+            logger.info(f"Request payload: {{'model': 'anthropic/claude-3-opus:beta', 'messages': [{{'role': 'system'}}, {{'role': 'user'}}]}}")
+            
+            # Make the API request
+            response = requests.post(
+                url,
+                headers=headers,
+                json={
+                    "model": "anthropic/claude-3-opus:beta",
+                    "messages": messages,
+                    "temperature": 0.7,
+                    "max_tokens": 1000
+                },
+                timeout=30  # Add timeout
+            )
+            
+            # Log the response status
+            logger.info(f"API Response Status: {response.status_code}")
+            
+            # Check if the request was successful
+            response.raise_for_status()
+            
+            # Parse the response
+            data = response.json()
+            
+            # Log successful response
+            logger.info("Successfully received response from OpenRouter API")
+            
+            # Return the response
+            return JsonResponse(data)
+            
+        except requests.exceptions.RequestException as e:
+            error_msg = f"API request failed: {str(e)}"
+            logger.error(error_msg)
+            if hasattr(e.response, 'text'):
+                logger.error(f"Response text: {e.response.text}")
+            return JsonResponse({
+                'error': 'Failed to get response from AI service. Please try again.'
+            }, status=500)
+        except Exception as e:
+            error_msg = f"Unexpected error: {str(e)}"
+            logger.error(error_msg)
+            return JsonResponse({
+                'error': 'An unexpected error occurred. Please try again.'
+            }, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@login_required
+def ai_waste_chatbot(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        message = data.get('message')
+        
+        if not message:
+            return JsonResponse({'error': 'Message is required'}, status=400)
+        
+        # Get the API key and URL from settings
+        api_key = settings.OPENROUTER_API_KEY
+        api_url = settings.OPENROUTER_API_URL
+        
+        # Prepare the request to OpenRouter API
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json',
+            'HTTP-Referer': request.build_absolute_uri('/'),
+            'X-Title': 'FreshGuard+ Waste Reduction'
+        }
+        
+        payload = {
+            'model': 'openai/gpt-3.5-turbo',
+            'messages': [
+                {
+                    'role': 'system',
+                    'content': 'You are a helpful Food Safety and Waste Reduction Assistant. Provide creative recipes and tips for using leftover ingredients and reducing food waste. Format your response with "Recipes:" and "Tips:" sections.'
+                },
+                {
+                    'role': 'user',
+                    'content': message
+                }
+            ],
+            'max_tokens': 400,
+            'temperature': 0.7
+        }
+        
+        # Make the request to OpenRouter API
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        
+        # Parse the response
+        result = response.json()
+        ai_response = result['choices'][0]['message']['content']
+        
+        return JsonResponse({'response': ai_response})
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except requests.exceptions.RequestException as e:
+        logger.error(f"OpenRouter API request failed: {str(e)}")
+        if hasattr(e.response, 'text'):
+            logger.error(f"API response: {e.response.text}")
+        return JsonResponse({'error': 'Failed to get response from AI service'}, status=500)
+    except Exception as e:
+        logger.error(f"Unexpected error in ai_waste_chatbot: {str(e)}")
+        return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
