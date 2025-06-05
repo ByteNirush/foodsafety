@@ -4,108 +4,167 @@
   <head>
     <meta charset="UTF-8" />
     <title>Profile | FreshGuard+</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          fontFamily: { sans: ["Inter", "sans-serif"] },
+          extend: {
+            colors: {
+              primary: "#4CAF50",
+              accent: "#FFE066",
+              danger: "#FF6B6B",
+              darkbg: "#1a2233",
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
       .profile-avatar {
         background: linear-gradient(135deg, #4caf50 60%, #ffe066 100%);
+        position: relative;
+      }
+      /* Card shadow and animation for login-like feel */
+      .animate-pop {
+        animation: pop-in 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        transition: box-shadow 0.3s, transform 0.3s;
+      }
+      .animate-pop:hover {
+        box-shadow: 0 8px 32px 0 rgba(76, 175, 80, 0.18),
+          0 1.5px 6px 0 rgba(255, 224, 102, 0.12);
+        transform: translateY(-4px) scale(1.02);
+      }
+      @keyframes pop-in {
+        0% {
+          transform: scale(0.9) translateY(40px);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1) translateY(0);
+          opacity: 1;
+        }
+      }
+      .edit-avatar-btn {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: #fff;
+        border-radius: 9999px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 0.25rem;
+        cursor: pointer;
       }
     </style>
   </head>
-  <body class="font-sans antialiased min-h-screen bg-gray-50">
-    <!-- Header -->
-    <div class="flex items-center justify-between px-8 py-6 bg-white shadow">
-      <div class="flex items-center space-x-3">
-        <a
-          href="{% url 'core-dashboard' %}"
-          class="flex items-center space-x-3"
-        >
-          <img
-            src="https://img.icons8.com/color/48/000000/cutting-board.png"
-            alt="FreshGuard+"
-            class="w-10 h-10"
-          />
-          <span class="text-2xl font-bold text-primary">FreshGuard+</span>
-        </a>
-      </div>
-      {% if user.is_authenticated %}
-            <a
-              href="{% url 'core-logout' %}"
-              class="bg-green-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition"
-            >
-              Logout
-            </a>
-      {% endif %}
-    </div>
-    <!-- Profile Card -->
-    <div class="max-w-2xl mx-auto mt-12 bg-white rounded-2xl shadow-2xl p-10">
+  <body
+    class="font-sans antialiased min-h-screen flex items-center justify-center bg-gradient-to-bl from-green-100 via-yellow-50 to-red-50 relative overflow-hidden"
+  >
+    <!-- Animated Food Fight Background -->
+    <svg
+      class="absolute animate-fly1 left-10 top-24 w-20 h-20 z-0 pointer-events-none"
+      viewBox="0 0 64 64"
+    >
+      <!-- Tomato -->
+      <circle cx="32" cy="32" r="20" fill="#FF6B6B" />
+      <ellipse cx="32" cy="22" rx="8" ry="4" fill="#4CAF50" />
+    </svg>
+    <svg
+      class="absolute animate-fly2 right-16 top-40 w-16 h-16 z-0 pointer-events-none"
+      viewBox="0 0 64 64"
+    >
+      <!-- Bread -->
+      <rect x="12" y="20" width="40" height="28" rx="12" fill="#FFE066" />
+      <ellipse cx="32" cy="20" rx="20" ry="10" fill="#FFD166" />
+    </svg>
+    <svg
+      class="absolute animate-fly3 left-1/2 bottom-10 w-14 h-14 z-0 pointer-events-none"
+      viewBox="0 0 64 64"
+    >
+      <!-- Cheese -->
+      <rect x="16" y="24" width="32" height="24" rx="8" fill="#FFD166" />
+      <circle cx="28" cy="36" r="3" fill="#FFEDC2" />
+      <circle cx="40" cy="44" r="2" fill="#FFEDC2" />
+    </svg>
+    <div
+      class="absolute inset-0 bg-gradient-to-br from-green-100 via-yellow-50 to-red-50 -z-10"
+    ></div>
+    <div
+      class="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8 animate-pop relative"
+    >
       <div class="flex flex-col items-center">
         <div
-          class="profile-avatar w-28 h-28 rounded-full flex items-center justify-center shadow-lg mb-4"
+          class="profile-avatar w-24 h-24 rounded-full flex items-center justify-center shadow-lg mb-4"
         >
-          <span class="text-5xl font-bold text-white">
+          <span class="text-4xl font-bold text-white select-none">
             {{ user.first_name|slice:":1"|upper }}
           </span>
+          <button class="edit-avatar-btn" title="Edit avatar" tabindex="0">
+            <svg
+              class="w-5 h-5 text-primary"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M15.232 5.232l3.536 3.536M9 13l6-6 3 3-6 6H9v-3z" />
+            </svg>
+          </button>
         </div>
-        <h1 class="text-3xl font-bold text-primary mb-1">
+        <h1 class="text-2xl font-bold text-primary mb-1">
           {{ user.first_name }}
         </h1>
-        <p class="text-gray-500 mb-6">{{ user.email }}</p>
-        <div class="w-full border-t border-gray-200 my-6"></div>
-        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div>
-            <div class="flex items-center mb-2">
-              <svg
-                class="w-5 h-5 text-primary mr-2"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 16v-4M12 8h.01" />
-              </svg>
-              <span class="font-semibold text-gray-700">Gender:</span>
-            </div>
-            <div class="ml-7 text-gray-900">
-              {{ gender|default:"Not specified" }}
-            </div>
+        <div class="flex items-center gap-2 mb-4">
+          <p class="text-gray-500 break-all" id="userEmail">{{ user.email }}</p>
+          <button
+            onclick="copyEmail()"
+            class="p-1 rounded hover:bg-gray-100"
+            title="Copy email"
+            aria-label="Copy email"
+          >
+            <svg
+              class="w-4 h-4 text-primary"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" />
+              <path d="M5 15V5a2 2 0 012-2h10" />
+            </svg>
+          </button>
+        </div>
+        <div class="w-full border-t border-gray-200 my-4"></div>
+        <div class="space-y-4 w-full">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold text-gray-700">Gender:</span>
+            <span class="text-gray-900"
+              >{{ gender|default:"Not specified" }}</span
+            >
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="font-semibold text-gray-700">Date of Birth:</span>
+            <span class="text-gray-900">{{ dob|default:"Not specified" }}</span>
           </div>
           <div>
-            <div class="flex items-center mb-2">
-              <svg
-                class="w-5 h-5 text-primary mr-2"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M16 2v4M8 2v4M3 10h18" />
-              </svg>
-              <span class="font-semibold text-gray-700">Date of Birth:</span>
-            </div>
-            <div class="ml-7 text-gray-900">
-              {{ dob|default:"Not specified" }}
-            </div>
-          </div>
-          <div class="md:col-span-2">
-            <div class="flex items-center mb-2">
-              <svg
-                class="w-5 h-5 text-primary mr-2"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M12 20h.01M12 4a8 8 0 0 1 8 8c0 4.418-3.582 8-8 8s-8-3.582-8-8a8 8 0 0 1 8-8z"
-                />
-              </svg>
+            <div class="flex items-center justify-between">
               <span class="font-semibold text-gray-700"
                 >Medical Condition(s):</span
               >
+              <button
+                id="toggleMed"
+                onclick="toggleMedical()"
+                class="text-primary text-xs font-semibold hover:underline focus:outline-none"
+              >
+                Show
+              </button>
             </div>
-            <div class="ml-7 text-gray-900">
+            <div id="medicalList" class="ml-2 mt-1 text-gray-900 hidden">
               {% if medical_condition_list %}
               <ul class="list-disc pl-5">
                 {% for cond in medical_condition_list %}
@@ -116,15 +175,184 @@
             </div>
           </div>
         </div>
-        <div class="w-full flex justify-end mt-8">
+        <div class="w-full flex justify-end mt-6">
           <a
             href="{% url 'core-about-user' %}"
-            class="bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-600 transition shadow"
+            class="bg-primary text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-600 transition shadow flex items-center gap-2"
           >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 20h9" />
+              <path
+                d="M16.5 3.5a2.121 2.121 0 113 3L7 19.5 3 21l1.5-4L16.5 3.5z"
+              />
+            </svg>
             Edit Profile
           </a>
         </div>
+        <div class="w-full flex justify-center mt-4">
+          <button
+            onclick="showLogoutModal()"
+            class="text-danger font-semibold hover:underline text-sm"
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </div>
+    <!-- Logout Modal -->
+    <div
+      id="logoutModal"
+      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden"
+    >
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 w-full max-w-xs text-center"
+      >
+        <h2 class="text-lg font-bold mb-2 text-danger">Confirm Logout</h2>
+        <p class="mb-4 text-gray-600">Are you sure you want to logout?</p>
+        <div class="flex gap-3 justify-center">
+          <a
+            href="{% url 'core-logout' %}"
+            class="bg-danger text-white px-4 py-2 rounded font-semibold hover:bg-red-500 transition"
+          >
+            Logout
+          </a>
+          <button
+            onclick="hideLogoutModal()"
+            class="bg-gray-200 text-gray-700 px-4 py-2 rounded font-semibold hover:bg-gray-300 transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Copy email
+      function copyEmail() {
+        const email = document.getElementById("userEmail").innerText;
+        navigator.clipboard.writeText(email);
+        alert("Email copied!");
+      }
+
+      // Show/hide medical conditions
+      function toggleMedical() {
+        const med = document.getElementById("medicalList");
+        const btn = document.getElementById("toggleMed");
+        if (med.classList.contains("hidden")) {
+          med.classList.remove("hidden");
+          btn.innerText = "Hide";
+        } else {
+          med.classList.add("hidden");
+          btn.innerText = "Show";
+        }
+      }
+
+      // Logout modal
+      function showLogoutModal() {
+        document.getElementById("logoutModal").classList.remove("hidden");
+      }
+      function hideLogoutModal() {
+        document.getElementById("logoutModal").classList.add("hidden");
+      }
+    </script>
+    <style>
+      /* Food flying/fighting keyframes */
+      @keyframes fly1 {
+        0% {
+          transform: translateY(0) rotate(-10deg) scale(1);
+        }
+        30% {
+          transform: translateY(-40px) translateX(30px) rotate(10deg) scale(1.1);
+        }
+        60% {
+          transform: translateY(10px) translateX(-10px) rotate(-20deg)
+            scale(0.95);
+        }
+        100% {
+          transform: translateY(0) rotate(-10deg) scale(1);
+        }
+      }
+      @keyframes fly2 {
+        0% {
+          transform: translateY(0) rotate(10deg) scale(1);
+        }
+        25% {
+          transform: translateY(-30px) translateX(-20px) rotate(-10deg)
+            scale(1.05);
+        }
+        50% {
+          transform: translateY(20px) translateX(20px) rotate(20deg) scale(1.1);
+        }
+        100% {
+          transform: translateY(0) rotate(10deg) scale(1);
+        }
+      }
+      @keyframes fly3 {
+        0% {
+          transform: translateY(0) rotate(0deg) scale(1);
+        }
+        20% {
+          transform: translateY(-20px) translateX(10px) rotate(15deg)
+            scale(1.08);
+        }
+        60% {
+          transform: translateY(30px) translateX(-20px) rotate(-10deg)
+            scale(0.92);
+        }
+        100% {
+          transform: translateY(0) rotate(0deg) scale(1);
+        }
+      }
+      .animate-fly1 {
+        animation: fly1 4s ease-in-out infinite alternate;
+      }
+      .animate-fly2 {
+        animation: fly2 5s ease-in-out infinite alternate;
+      }
+      .animate-fly3 {
+        animation: fly3 3.5s ease-in-out infinite alternate;
+      }
+
+      /* Card bounce animation */
+      @keyframes bounce-short {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+      .animate-bounce-short {
+        animation: bounce-short 1.2s infinite;
+      }
+
+      /* Slow spin for logo */
+      @keyframes spin-slow {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .animate-spin-slow {
+        animation: spin-slow 8s linear infinite;
+      }
+
+      /* Primary color for text */
+      .text-primary {
+        color: #4caf50;
+      }
+      .bg-primary {
+        background: #4caf50;
+      }
+    </style>
+
   </body>
 </html>
