@@ -6,8 +6,14 @@ import os
 from pathlib import Path
 
 # OpenRouter API Configuration
-OPENROUTER_API_KEY = "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"
-OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', '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')
+OPENROUTER_API_URL = os.environ.get('OPENROUTER_API_URL', 'https://openrouter.ai/api/v1/chat/completions')
+
+# API Configuration
+API_MAX_TOKENS = int(os.environ.get('API_MAX_TOKENS', '2000'))  # Reduced token limit
+API_TEMPERATURE = float(os.environ.get('API_TEMPERATURE', '0.7'))
+API_MAX_RETRIES = int(os.environ.get('API_MAX_RETRIES', '3'))
+API_TIMEOUT = int(os.environ.get('API_TIMEOUT', '30'))
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

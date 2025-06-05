@@ -38,7 +38,8 @@ def get_response(request):
                     Always provide practical, actionable advice and cite relevant regulations when applicable.
                     If you're unsure about something, acknowledge the limitation and suggest consulting a food safety expert.
                     
-                    Keep your responses concise and focused on the user's question."""
+                    Keep your responses concise and focused on the user's question.
+                    Limit your response to 2-3 sentences maximum."""
                 },
                 {
                     "role": "user",
@@ -51,7 +52,7 @@ def get_response(request):
                 result = call_openrouter_api(
                     messages=messages,
                     model="anthropic/claude-3-opus:beta",
-                    max_tokens=250,  # Reduced token limit
+                    max_tokens=200,  # Reduced token limit
                     temperature=0.7
                 )
                 

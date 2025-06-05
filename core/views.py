@@ -176,7 +176,7 @@ def profile(request):
     }
     return render(request, "core/profile.html", context)
 
-def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_tokens=300, temperature=0.7, max_retries=3):
+def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_tokens=200, temperature=0.7, max_retries=3):
     """
     Utility function to make calls to OpenRouter API with retry mechanism and better error handling
     """
@@ -210,6 +210,10 @@ def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_toke
             
             elif response.status_code == 402:
                 logger.error("Payment required: Insufficient credits")
+                # Try with reduced tokens
+                if max_tokens > 100:
+                    logger.info(f"Retrying with reduced tokens: {max_tokens - 50}")
+                    return call_openrouter_api(messages, model, max_tokens - 50, temperature, max_retries)
                 raise Exception("Insufficient credits. Please add credits to your OpenRouter account.")
             
             elif response.status_code == 429:
@@ -222,7 +226,14 @@ def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_toke
                 raise Exception("Rate limit exceeded. Please try again later.")
             
             response.raise_for_status()
-            return response.json()
+            result = response.json()
+            
+            # Validate response format
+            if not result or 'choices' not in result or not result['choices']:
+                logger.error("Invalid response format from API")
+                raise Exception("Invalid response from AI service")
+                
+            return result
             
         except RequestException as e:
             logger.error(f"API request failed (attempt {retry_count + 1}/{max_retries}): {str(e)}")
