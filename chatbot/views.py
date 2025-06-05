@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 import json
 import logging
-from core.views import call_openrouter_api, get_fallback_response
+from core.views import call_openrouter_api
 
 logger = logging.getLogger(__name__)
 
@@ -36,10 +36,7 @@ def get_response(request):
                     - Food safety training requirements
                     
                     Always provide practical, actionable advice and cite relevant regulations when applicable.
-                    If you're unsure about something, acknowledge the limitation and suggest consulting a food safety expert.
-                    
-                    Keep your responses concise and focused on the user's question.
-                    Limit your response to 2-3 sentences maximum."""
+                    If you're unsure about something, acknowledge the limitation and suggest consulting a food safety expert."""
                 },
                 {
                     "role": "user",
@@ -48,17 +45,12 @@ def get_response(request):
             ]
             
             try:
-                # Use a lower token limit to stay within credit limits
                 result = call_openrouter_api(
                     messages=messages,
                     model="anthropic/claude-3-opus:beta",
-                    max_tokens=200,  # Reduced token limit
+                    max_tokens=300,
                     temperature=0.7
                 )
-                
-                if not result or 'choices' not in result or not result['choices']:
-                    logger.error("Invalid response format from API")
-                    return JsonResponse(get_fallback_response())
                 
                 return JsonResponse(result)
                 
@@ -66,24 +58,23 @@ def get_response(request):
                 error_message = str(e)
                 logger.error(f"Error in get_response: {error_message}")
                 
-                # Provide specific error messages based on the error type
-                if "401" in error_message:
+                if "Authentication failed" in error_message:
                     return JsonResponse({
-                        'error': 'Authentication failed. Please contact support.'
-                    }, status=401)
-                elif "402" in error_message:
+                        'error': 'Service configuration error. Please contact support.'
+                    }, status=500)
+                elif "Insufficient credits" in error_message:
                     return JsonResponse({
                         'error': 'Service temporarily unavailable. Please try again later.'
-                    }, status=402)
-                elif "429" in error_message:
-                    return JsonResponse({
-                        'error': 'Too many requests. Please wait a moment and try again.'
-                    }, status=429)
+                    }, status=503)
                 else:
-                    return JsonResponse(get_fallback_response())
-            
+                    return JsonResponse({
+                        'error': 'Failed to get response from AI service. Please try again.'
+                    }, status=500)
+                
         except Exception as e:
             logger.error(f"Unexpected error in get_response: {str(e)}")
-            return JsonResponse(get_fallback_response())
+            return JsonResponse({
+                'error': 'An unexpected error occurred. Please try again later.'
+            }, status=500)
     
     return JsonResponse({'error': 'Invalid request method'}, status=400)

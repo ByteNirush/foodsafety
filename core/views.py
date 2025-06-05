@@ -8,8 +8,6 @@ import requests
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import logging
-import time
-from requests.exceptions import RequestException
 
 from foodsafety import settings
 from .models import CustomUser, Product, CommunityReport, Comment
@@ -176,99 +174,64 @@ def profile(request):
     }
     return render(request, "core/profile.html", context)
 
-def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_tokens=200, temperature=0.7, max_retries=3):
+def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_tokens=300, temperature=0.7):
     """
-    Utility function to make calls to OpenRouter API with retry mechanism and better error handling
+    Utility function to make calls to OpenRouter API with retry logic and better error handling
     """
-    url = settings.OPENROUTER_API_URL
-    headers = {
-        "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost:8000",
-        "X-Title": "FreshGuard+ Food Safety Assistant"
-    }
+    max_retries = 3
+    current_tokens = max_tokens
     
-    payload = {
-        "model": model,
-        "messages": messages,
-        "max_tokens": max_tokens,
-        "temperature": temperature
-    }
-    
-    retry_count = 0
-    base_delay = 1  # Base delay in seconds
-    
-    while retry_count < max_retries:
+    for attempt in range(max_retries):
         try:
-            logger.info(f"Making request to OpenRouter API (attempt {retry_count + 1}/{max_retries})")
+            url = settings.OPENROUTER_API_URL
+            headers = {
+                "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "http://localhost:8000",
+                "X-Title": "FreshGuard+ Food Safety Assistant"
+            }
+            
+            payload = {
+                "model": model,
+                "messages": messages,
+                "max_tokens": current_tokens,
+                "temperature": temperature
+            }
+            
+            logger.info(f"Making request to OpenRouter API (attempt {attempt + 1}/{max_retries})")
             response = requests.post(url, json=payload, headers=headers, timeout=30)
             
-            # Check for specific error status codes
+            # Check for authentication error
             if response.status_code == 401:
                 logger.error("Authentication failed: Invalid or expired API key")
                 raise Exception("Authentication failed. Please check your API key configuration.")
             
-            elif response.status_code == 402:
-                logger.error("Payment required: Insufficient credits")
-                # Try with reduced tokens
-                if max_tokens > 100:
-                    logger.info(f"Retrying with reduced tokens: {max_tokens - 50}")
-                    return call_openrouter_api(messages, model, max_tokens - 50, temperature, max_retries)
-                raise Exception("Insufficient credits. Please add credits to your OpenRouter account.")
-            
-            elif response.status_code == 429:
-                logger.warning("Rate limit exceeded. Retrying with backoff...")
-                retry_count += 1
-                if retry_count < max_retries:
-                    delay = base_delay * (2 ** retry_count)  # Exponential backoff
-                    time.sleep(delay)
-                    continue
-                raise Exception("Rate limit exceeded. Please try again later.")
+            # Check for payment required error
+            if response.status_code == 402:
+                error_data = response.json()
+                if "error" in error_data and "message" in error_data["error"]:
+                    logger.error(f"Payment required: {error_data['error']['message']}")
+                    # Try with reduced tokens
+                    current_tokens = max(50, current_tokens - 50)
+                    if attempt < max_retries - 1:
+                        logger.info(f"Retrying with reduced tokens: {current_tokens}")
+                        continue
+                    else:
+                        raise Exception("Insufficient credits. Please add credits to your OpenRouter account.")
             
             response.raise_for_status()
-            result = response.json()
+            return response.json()
             
-            # Validate response format
-            if not result or 'choices' not in result or not result['choices']:
-                logger.error("Invalid response format from API")
-                raise Exception("Invalid response from AI service")
-                
-            return result
-            
-        except RequestException as e:
-            logger.error(f"API request failed (attempt {retry_count + 1}/{max_retries}): {str(e)}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"API request failed: {str(e)}")
             if hasattr(e, 'response') and e.response is not None:
                 logger.error(f"Response text: {e.response.text}")
-            
-            retry_count += 1
-            if retry_count < max_retries:
-                delay = base_delay * (2 ** retry_count)
-                logger.info(f"Retrying in {delay} seconds...")
-                time.sleep(delay)
-            else:
-                raise Exception("Failed to connect to AI service after multiple attempts. Please try again later.")
-        
+            if attempt == max_retries - 1:
+                raise Exception("An unexpected error occurred. Please try again later.")
+            continue
         except Exception as e:
             logger.error(f"Unexpected error: {str(e)}")
-            raise Exception("An unexpected error occurred. Please try again later.")
-
-def get_fallback_response():
-    """
-    Returns a fallback response when the AI service is unavailable
-    """
-    return {
-        "choices": [{
-            "message": {
-                "content": "I apologize, but I'm currently unable to process your request. This could be due to:\n\n" +
-                          "1. Temporary service interruption\n" +
-                          "2. High server load\n" +
-                          "3. Network connectivity issues\n\n" +
-                          "Please try again in a few moments. If the problem persists, you can:\n" +
-                          "- Check your internet connection\n" +
-                          "Contact support if the issue continues"
-            }
-        }]
-    }
+            raise
 
 @login_required
 def check_safety(request):

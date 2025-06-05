@@ -22,17 +22,29 @@ def test_openrouter_api():
                 "content": "Hello, can you help me with food safety?"
             }
         ],
-        "max_tokens": 500,
+        "max_tokens": 100,  # Reduced tokens for testing
         "temperature": 0.7
     }
     
     try:
+        print("Making request to OpenRouter API...")
+        print(f"URL: {url}")
+        print(f"Headers: {json.dumps(headers, indent=2)}")
+        print(f"Data: {json.dumps(data, indent=2)}")
+        
         response = requests.post(url, headers=headers, json=data)
-        print(f"Status Code: {response.status_code}")
-        print("Response:")
+        print(f"\nStatus Code: {response.status_code}")
+        print("Response Headers:")
+        print(json.dumps(dict(response.headers), indent=2))
+        print("\nResponse Body:")
         print(json.dumps(response.json(), indent=2))
+    except requests.exceptions.RequestException as e:
+        print(f"\nRequest Error: {str(e)}")
+        if hasattr(e, 'response') and e.response is not None:
+            print(f"Response Status Code: {e.response.status_code}")
+            print(f"Response Text: {e.response.text}")
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"\nUnexpected Error: {str(e)}")
 
 if __name__ == "__main__":
     test_openrouter_api() 
