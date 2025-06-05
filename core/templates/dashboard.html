@@ -1,0 +1,206 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>Welcome to Food Safety Dashboard</h1>
+            <!-- Your existing dashboard content here -->
+        </div>
+        <div class="col-md-4">
+            <!-- Chatbot Container -->
+            <div class="chat-container" style="position: relative; height: 600px; margin-top: 20px;">
+                <div class="chat-header">
+                    <h3 style="margin: 0;">Food Safety Assistant</h3>
+                </div>
+                <div class="chat-body" id="chatbox">
+                    <div class="message bot-message">
+                        Hello! I'm your Food Safety Assistant. I can help you with:
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                            <li>Food handling and storage</li>
+                            <li>Preventing foodborne illnesses</li>
+                            <li>Food safety regulations</li>
+                            <li>Best practices for restaurants</li>
+                            <li>Home food safety tips</li>
+                        </ul>
+                        How can I help you today?
+                    </div>
+                </div>
+                <div class="chat-footer">
+                    <div class="input-group">
+                        <input type="text" id="userInput" placeholder="Ask about food safety..." onkeypress="handleKeyPress(event)">
+                        <button onclick="sendMessage()">Send</button>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                        Try asking about: "How to store food safely?" or "What are the main food safety regulations?"
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .chat-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-header {
+        background: #4CAF50;
+        color: white;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .chat-body {
+        flex-grow: 1;
+        padding: 15px;
+        overflow-y: auto;
+        background: #f5f5f5;
+        height: 400px;
+    }
+
+    .chat-footer {
+        padding: 15px;
+        background: white;
+        border-top: 1px solid #ddd;
+    }
+
+    .message {
+        margin-bottom: 10px;
+        padding: 8px 12px;
+        border-radius: 15px;
+        max-width: 80%;
+    }
+
+    .user-message {
+        background: #4CAF50;
+        color: white;
+        margin-left: auto;
+    }
+
+    .bot-message {
+        background: white;
+        color: black;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .input-group input {
+        flex-grow: 1;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+    }
+
+    .input-group button {
+        padding: 8px 15px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+    }
+
+    .input-group button:hover {
+        background: #45a049;
+    }
+
+    .message ul {
+        margin: 5px 0;
+        padding-left: 20px;
+    }
+
+    .message li {
+        margin: 3px 0;
+    }
+</style>
+
+<script>
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    function sendMessage() {
+        const userInput = document.getElementById('userInput');
+        const message = userInput.value.trim();
+        
+        if (!message) return;
+
+        // Add user message to chat
+        const chatbox = document.getElementById('chatbox');
+        chatbox.innerHTML += `
+            <div class="message user-message">
+                ${message}
+            </div>
+        `;
+
+        // Clear input
+        userInput.value = '';
+
+        // Scroll to bottom
+        chatbox.scrollTop = chatbox.scrollHeight;
+
+        // Send to backend
+        fetch('/chatbot/get_response/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: `message=${encodeURIComponent(message)}`,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                chatbox.innerHTML += `
+                    <div class="message bot-message" style="color: red;">
+                        Error: ${data.error}
+                    </div>
+                `;
+            } else {
+                chatbox.innerHTML += `
+                    <div class="message bot-message">
+                        ${data.choices[0].message.content}
+                    </div>
+                `;
+            }
+            chatbox.scrollTop = chatbox.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            chatbox.innerHTML += `
+                <div class="message bot-message" style="color: red;">
+                    Sorry, I encountered an error. Please try again.
+                </div>
+            `;
+            chatbox.scrollTop = chatbox.scrollHeight;
+        });
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %} 
