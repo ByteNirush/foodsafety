@@ -32,9 +32,29 @@ class CustomUser(AbstractUser):
         return self.email
 
 class Product(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='products', null=True, blank=True)
     name = models.CharField(max_length=200)
     manufacture_date = models.DateField()
     expire_date = models.DateField()
+    status = models.CharField(max_length=20, choices=[
+        ('Available', 'Available'),
+        ('Donated', 'Donated'),
+        ('Thrown', 'Thrown'),
+    ], default='Available')
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} (by {self.user.email if self.user else 'No User'})"
+    
+class Donation(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='donations')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='donations', null=True, blank=True)
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    food_items = models.TextField()
+    pickup_location = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Donation by {self.user.email} at {self.created_at}"

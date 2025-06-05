@@ -45,7 +45,7 @@
     <div class="flex items-center justify-between px-8 py-6 bg-white shadow">
       <div class="flex items-center space-x-3">
         <a
-          href="{% url 'core-dashboard' %}"
+          href="{% url 'core-donation_portal_dashboard' %}"
           class="flex items-center space-x-3"
         >
           <img
@@ -57,6 +57,15 @@
         </a>
       </div>
     </div>
+
+    <!-- Messages -->
+    {% if messages %}
+      <div class="max-w-7xl mx-auto py-4 px-4">
+        {% for message in messages %}
+          <p class="text-{% if message.tags == 'success' %}green-600{% else %}red-600{% endif %}">{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto py-12 px-4 flex flex-col md:flex-row gap-8">
@@ -153,6 +162,7 @@
                 name="search"
                 class="p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
                 placeholder="Search product..."
+                value="{{ request.GET.search }}"
               />
               <button
                 type="submit"
@@ -173,48 +183,58 @@
                   {{ product.name }}
                 </div>
                 <div class="text-gray-700 text-sm mt-1">
-                  Manufacture Date: {{ product.manufacture_date|date:"Y-m-d"
-                  }}<br />
+                  Manufacture Date: {{ product.manufacture_date|date:"Y-m-d" }}<br />
                   Expiry Date: {{ product.expire_date|date:"Y-m-d" }}
+                  {% if request.user.is_admin %}
+                    <br />Added by: {{ product.user.email }}
+                  {% endif %}
                 </div>
               </div>
               <div class="flex space-x-2">
-                <button
-                  title="Donate"
-                  class="text-blue-600 hover:text-blue-800 transition"
-                >
-                  <svg
-                    class="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                <form method="post" action="{% url 'core-donate_product' product.id %}">
+                  {% csrf_token %}
+                  <button
+                    type="submit"
+                    title="Donate"
+                    class="text-blue-600 hover:text-blue-800 transition"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                </button>
-                <button
-                  title="Throw"
-                  class="text-red-600 hover:text-red-800 transition"
-                >
-                  <svg
-                    class="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      ></path>
+                    </svg>
+                  </button>
+                </form>
+                <form method="post" action="{% url 'core-throw_product' product.id %}">
+                  {% csrf_token %}
+                  <button
+                    type="submit"
+                    title="Throw"
+                    class="text-red-600 hover:text-red-800 transition"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4m-4 0a2 2 0 00-2 2v1h8V5a2 2 0 00-2-2m0 0h4m-8 0H7"
-                    ></path>
-                  </svg>
-                </button>
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4m-4 0a2 2 0 00-2 2v1h8V5a2 2 0 00-2-2m0 0h4m-8 0H7"
+                      ></path>
+                    </svg>
+                  </button>
+                </form>
               </div>
             </li>
             {% endfor %}
@@ -242,7 +262,7 @@
             </svg>
             Submit Donation
           </h2>
-          <form method="POST" action="{% url 'donation-submit' %}">
+          <form method="POST" action="{% url 'core-submit_donation' %}">
             {% csrf_token %}
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1"
@@ -300,7 +320,7 @@
             </button>
           </form>
         </div>
-        <!-- Advanced Feature: Donation Stats -->
+        <!-- Donation Stats -->
         <div class="glass rounded-xl shadow-lg p-8">
           <h2
             class="text-xl font-bold text-primary mb-4 flex items-center gap-2"
@@ -330,11 +350,11 @@
             </li>
             <li>
               <span class="font-semibold text-primary">Recently Donated:</span>
-              <span><!-- Add logic for recent donations if available --></span>
+              <span>{{ donation_count }}</span>
             </li>
           </ul>
         </div>
-        <!-- Advanced Feature: Tips -->
+        <!-- Food Safety Tips -->
         <div class="glass rounded-xl shadow-lg p-8">
           <h2
             class="text-xl font-bold text-primary mb-4 flex items-center gap-2"

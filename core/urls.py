@@ -14,8 +14,11 @@ urlpatterns = [
     path('impact-analytics-dashboard/', views.impact_analytics_dashboard, name='core-impact_analytics_dashboard'),
     path('admin-dashboard/', views.admin_dashboard, name='core-admin_dashboard'),
     path('logout/', views.logout_view, name='core-logout'),
-    path('donation/submit/', views.submit_donation, name='donation-submit'),
     path('product/add/', views.add_product, name='add-product'),
     path('profile/', views.profile, name='core-profile'),
     path('ingredient_scanner_dashboard/', views.check_safety, name='core-check_safety'),
+    path('donation/submit/', views.submit_donation, name='core-submit_donation'),
+    path('product/add/', views.add_product, name='core-add_product'),
+    path('product/donate/<int:product_id>/', views.donate_product, name='core-donate_product'),
+    path('product/throw/<int:product_id>/', views.throw_product, name='core-throw_product'),
 ]

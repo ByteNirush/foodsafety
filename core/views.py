@@ -1,13 +1,13 @@
 import json
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 import requests
 
 from foodsafety import settings
-from .models import CustomUser, Product
+from .models import CustomUser, Donation, Product
 
 def index(request):
     return render(request, 'core/login.html')
@@ -127,15 +127,60 @@ def add_product(request):
         expire_date = request.POST.get('expire_date')
         try:
             Product.objects.create(
+                user=request.user,
                 name=name,
                 manufacture_date=manufacture_date,
-                expire_date=expire_date
+                expire_date=expire_date,
+                status='Available'
             )
             messages.success(request, 'Product added successfully!')
         except Exception as e:
             messages.error(request, f'Error adding product: {str(e)}')
         return redirect('core-donation_portal_dashboard')
     return redirect('core/donation_portal_dashboard.html')
+
+
+def donate_product(request, product_id):
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please log in to donate a product.')
+        return redirect('login')
+
+    product = get_object_or_404(Product, id=product_id, user=request.user)
+    if request.method == 'POST':
+        try:
+            product.status = 'Donated'
+            product.save()
+            Donation.objects.create(
+                user=request.user,
+                product=product,
+                name=request.user.get_full_name() or request.user.username,
+                email=request.user.email,
+                food_items=product.name,
+                pickup_location=request.user.address or 'Not specified'
+            )
+            messages.success(request, f'{product.name} marked as donated!')
+        except Exception as e:
+            messages.error(request, f'Error donating product: {str(e)}')
+        return redirect('core-donation_portal_dashboard')
+    return render(request, 'core/confirm_donate.html', {'product': product})
+
+def throw_product(request, product_id):
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please log in to throw a product.')
+        return redirect('login')
+
+    product = get_object_or_404(Product, id=product_id, user=request.user)
+    if request.method == 'POST':
+        try:
+            product.status = 'Thrown'
+            product.save()
+            messages.success(request, f'{product.name} marked as thrown!')
+        except Exception as e:
+            messages.error(request, f'Error throwing product: {str(e)}')
+        return redirect('core-donation_portal_dashboard')
+    return render(request, 'core/confirm_throw.html', {'product': product})
+
+
 
 def profile(request):
     user = request.user
