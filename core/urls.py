@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('login/', views.user_login, name='core-login'),  # Updated to user_login
+    path('login/', views.user_login, name='core-login'), 
     path('signup/', views.signup, name='core-signup'),
     path('user-about/', views.user_about, name='core-about-user'),
     path('dashboard/', views.dashboard, name='core-dashboard'),
@@ -14,8 +14,13 @@ urlpatterns = [
     path('impact-analytics-dashboard/', views.impact_analytics_dashboard, name='core-impact_analytics_dashboard'),
     path('admin-dashboard/', views.admin_dashboard, name='core-admin_dashboard'),
     path('logout/', views.logout_view, name='core-logout'),
-    path('donation/submit/', views.submit_donation, name='donation-submit'),
     path('product/add/', views.add_product, name='add-product'),
     path('profile/', views.profile, name='core-profile'),
     path('ingredient_scanner_dashboard/', views.check_safety, name='core-check_safety'),
+    path('donation/details/<int:product_id>/', views.donation_details, name='donation-details'),
+    path('product/delete/<int:product_id>/', views.delete_product, name='delete-product'),
+    path('donation/<int:product_id>/', views.donation_create, name='donation-create'),
+    path('community-watch/comment/<int:report_id>/', views.add_comment, name='add-comment'),
+    path('community-watch/delete/<int:report_id>/', views.delete_community_report, name='delete-community-report'),
+    path('donation-history/', views.donation_history, name='donation-history'),
 ]

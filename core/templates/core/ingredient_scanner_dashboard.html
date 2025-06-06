@@ -30,21 +30,28 @@
       /* Spinner animation */
       .spinner {
         border: 4px solid rgba(255, 255, 255, 0.3);
-        border-top: 4px solid #4CAF50;
+        border-top: 4px solid #4caf50;
         border-radius: 50%;
         width: 40px;
         height: 40px;
         animation: spin 1s linear infinite;
       }
       @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
   <body class="font-sans antialiased min-h-screen bg-gray-50">
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div
+      id="loading-overlay"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
+    >
       <div class="bg-white rounded-lg p-6 flex flex-col items-center space-y-4">
         <div class="spinner"></div>
         <p class="text-gray-700 font-semibold">Checking ingredient safety...</p>
@@ -69,8 +76,19 @@
       <div class="flex items-center space-x-4">
         <a
           href="{% url 'core-profile' %}"
-          class="bg-white border border-primary text-primary px-5 py-2 rounded-lg font-semibold hover:bg-primary hover:text-white transition"
+          class="bg-gray-100 text-primary px-5 py-2 rounded-lg font-semibold hover:bg-gray-200 transition flex items-center"
+          title="Profile"
         >
+          <svg
+            class="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4 4-7 8-7s8 3 8 7" />
+          </svg>
           Profile
         </a>
         <a
@@ -81,16 +99,19 @@
         </a>
       </div>
     </div>
-
     <!-- Ingredient Safety Scanner Dashboard -->
     <div class="max-w-3xl mx-auto py-12 px-4">
       <h1 class="text-3xl font-bold text-center text-yellow-600 mb-6">
         Ingredient Safety Scanner
       </h1>
       <p class="text-center text-gray-600 mb-10">
-        Enter or scan your ingredient to check for safety based on your medical conditions.
+        Enter or scan your ingredient to check for safety based on your medical
+        conditions.
       </p>
-      <form id="ingredient-form" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+      <form
+        id="ingredient-form"
+        class="bg-white rounded-xl shadow-lg p-8 space-y-6"
+      >
         {% csrf_token %}
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1"
@@ -198,12 +219,22 @@
           Check Safety
         </button>
       </form>
-      <!-- Dynamic Output Section -->
+      <!-- Result display matching chembarta.py output -->
       <div class="mt-10" id="ingredient-status">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">
           Ingredient Status
         </h2>
-        <div id="results"></div>
+        <div id="results">
+          <div class="bg-white border-l-4 border-yellow-400 p-4 rounded mb-4">
+            <div><span class="font-semibold">E Number:</span> {{ result.E_Number }}</div>
+            <div><span class="font-semibold">Ingredient:</span> {{ result.Ingredient }}</div>
+            <div><span class="font-semibold">True Category:</span> {{ result.True_Category }}</div>
+            <div><span class="font-semibold">Predicted Category:</span> {{ result.Predicted_Category }}</div>
+            <div><span class="font-semibold">Confidence:</span> {{ result.Confidence }}</div>
+            <div><span class="font-semibold">Description:</span> {{ result.Description }}</div>
+            <div><span class="font-semibold">Training Status:</span> {{ result.Training_Status }}</div>
+          </div>
+        </div>
       </div>
     </div>
     <script>
@@ -227,89 +258,57 @@
       }
 
       // Form submission with loading screen
-      document.getElementById("ingredient-form").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const loadingOverlay = document.getElementById("loading-overlay");
-        loadingOverlay.classList.remove("hidden");
+      document
+        .getElementById("ingredient-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const loadingOverlay = document.getElementById("loading-overlay");
+          loadingOverlay.classList.remove("hidden");
 
-        const formData = new FormData(e.target);
-        const data = {
-          ingredient: formData.get("ingredient") || formData.get("qr-result"),
-          expiration: formData.get("expiration"),
-          conditions: formData.get("conditions"),
-        };
+          const formData = new FormData(e.target);
+          const data = {
+            ingredient: formData.get("ingredient") || formData.get("qr-result"),
+            expiration: formData.get("expiration"),
+            conditions: formData.get("conditions"),
+          };
 
-        try {
-          const response = await fetch("/ingredient_scanner_dashboard/", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
-            },
-            body: JSON.stringify(data),
-          });
-          const result = await response.json();
-          loadingOverlay.classList.add("hidden");
-          displayResults(result);
-        } catch (error) {
-          console.error("Error:", error);
-          loadingOverlay.classList.add("hidden");
-          document.getElementById("results").innerHTML = `
+          try {
+            const response = await fetch("/ingredient_scanner_dashboard/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
+              },
+              body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            loadingOverlay.classList.add("hidden");
+            displayResults(result);
+          } catch (error) {
+            console.error("Error:", error);
+            loadingOverlay.classList.add("hidden");
+            document.getElementById("results").innerHTML = `
             <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded">
               <div class="font-semibold text-red-700">Error</div>
               <div class="text-gray-700 text-sm mt-1">Failed to check safety. Please try again.</div>
             </div>
           `;
-        }
-      });
-
-      function displayResults(data) {
-        const resultsDiv = document.getElementById("results");
-        resultsDiv.innerHTML = "";
-        data.forEach(item => {
-          const statusColor = item.status === "Safe" ? "green" : item.status === "Caution" ? "yellow" : "red";
-          const statusClass = `bg-${statusColor}-50 border-l-4 border-${statusColor}-400`;
-          const badgeClass = `bg-${statusColor}-200 text-${statusColor}-800`;
-          const scoreClass = `bg-${statusColor}-400 text-white`;
-          resultsDiv.innerHTML += `
-            <div class="${statusClass} p-4 rounded mb-4 flex items-center justify-between">
-              <div>
-                <div class="font-semibold text-${statusColor}-700">${item.ingredient}</div>
-                <div class="text-gray-700 text-sm mt-1">
-                  <span class="font-semibold">Status:</span>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badgeClass} ml-1">${item.status}</span>
-                  <br />
-                  <span class="font-semibold">Explanation:</span>
-                  <button onclick="showExplanation('${item.explanation}', '${item.ingredient}')"
-                    class="underline text-blue-600 text-xs ml-1">Why?</button>
-                </div>
-              </div>
-              <div>
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${scoreClass}">
-                  Safety Score: ${item.score}
-                </span>
-              </div>
-            </div>
-          `;
+          }
         });
 
-        // Explanation popup
-        window.showExplanation = (explanation, ingredient) => {
-          const popup = document.createElement("div");
-          popup.id = "explain-popup";
-          popup.className = "fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50";
-          popup.innerHTML = `
-            <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
-              <h3 class="text-lg font-semibold mb-2 text-yellow-700">Explanation for ${ingredient}</h3>
-              <p class="text-gray-700 mb-2">${explanation}</p>
-              <button onclick="this.closest('#explain-popup').remove()"
-                class="mt-2 px-4 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">
-                Close
-              </button>
-            </div>
-          `;
-          document.body.appendChild(popup);
-        };
+      function displayResults(data) {
+        const r = data[0]; // assuming data is a list with one dict
+        document.getElementById("results").innerHTML = `
+          <div class="bg-white border-l-4 border-yellow-400 p-4 rounded mb-4">
+            <div><span class="font-semibold">E Number:</span> ${r["E Number"]}</div>
+            <div><span class="font-semibold">Ingredient:</span> ${r["Ingredient"]}</div>
+            <div><span class="font-semibold">True Category:</span> ${r["True Category"]}</div>
+            <div><span class="font-semibold">Predicted Category:</span> ${r["Predicted Category"]}</div>
+            <div><span class="font-semibold">Confidence:</span> ${r["Confidence"]}</div>
+            <div><span class="font-semibold">Description:</span> ${r["Description"]}</div>
+            <div><span class="font-semibold">Training Status:</span> ${r["Training Status"]}</div>
+          </div>
+        `;
       }
     </script>
   </body>

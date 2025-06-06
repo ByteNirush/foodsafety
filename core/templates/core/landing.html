@@ -1,78 +1,37 @@
-{% load static %}
 <!DOCTYPE html>
-<html lang="en" class="bg-gray-50">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FreshGuard+ Dashboard</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          fontFamily: { sans: ["Inter", "sans-serif"] },
-          extend: {
-            colors: {
-              primary: "#4CAF50",
-              accent: "#FFE066",
-              danger: "#FF6B6B",
-              safe: "#4CAF50",
-              caution: "#FFD166",
-              risky: "#EF476F",
-            },
-          },
-        },
-      };
-    </script>
-  </head>
-  <body class="font-sans antialiased min-h-screen bg-gray-50">
-    <!-- Dashboard Header -->
-    <div class="flex items-center justify-between px-8 py-6 bg-white shadow">
-      <div class="flex items-center space-x-3">
-        <a
-          href="{% url 'core-dashboard' %}"
-          class="flex items-center space-x-3"
-        >
-          <img
-            src="https://img.icons8.com/color/48/000000/cutting-board.png"
-            alt="FreshGuard+"
-            class="w-10 h-10"
-          />
-          <span class="text-2xl font-bold text-primary">FreshGuard+</span>
-        </a>
-      </div>
-      <div class="flex items-center space-x-4">
-        <a
-          href="{% url 'core-profile' %}"
-          class="bg-gray-100 text-primary px-5 py-2 rounded-lg font-semibold hover:bg-gray-200 transition flex items-center"
-          title="Profile"
-        >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
-          </svg>
-          Profile
-        </a>
-        <a
-          href="{% url 'core-logout' %}"
-          class="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition"
-        >
-          Logout
-        </a>
-      </div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Welcome | FreshGuard+</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="font-sans antialiased min-h-screen dashboard-bg">
+  <!-- Navbar -->
+  <div class="flex items-center justify-between px-8 py-6 bg-white shadow">
+    <a href="{% url 'index' %}" class="flex items-center space-x-3">
+      <img src="https://img.icons8.com/color/48/000000/cutting-board.png" alt="FreshGuard+" class="w-10 h-10" />
+      <span class="text-2xl font-bold text-primary">FreshGuard+</span>
+    </a>
+    <div class="flex items-center space-x-4">
+      {% if user.is_authenticated %}
+        <a href="{% url 'core-profile' %}" class="bg-gray-100 text-primary px-5 py-2 rounded-lg font-semibold hover:bg-gray-200 transition">Profile</a>
+        <a href="{% url 'core-logout' %}" class="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition">Logout</a>
+      {% else %}
+        <a href="{% url 'core-login' %}" class="bg-gray-200 text-green px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition">Login</a>
+        <a href="{% url 'core-signup' %}" class="bg-gray-200 text-green-700 px-5 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">Sign Up</a>
+      {% endif %}
     </div>
-
-    <!-- Dashboard Features -->
+  </div>
+  <!-- Main Content -->
+  <!-- Dashboard Features -->
     <div
       class="max-w-6xl mx-auto py-12 px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
     >
       <!-- Feature 1 -->
       <div
         class="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:shadow-2xl transition cursor-pointer"
-        onclick="window.location.href='{% url 'core-ai_waste_dashboard' %}'"
+        onclick="window.location.href='{% if user.is_authenticated %}{% url 'core-ai_waste_dashboard' %}{% else %}{% url 'core-login' %}{% endif %}'"
       >
         <div class="bg-green-100 rounded-full p-4 mb-4">
           <svg
@@ -101,7 +60,7 @@
       <!-- Feature 2 -->
       <div
         class="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:shadow-2xl transition cursor-pointer"
-        onclick="window.location.href='{% url 'core-ingredient_scanner_dashboard' %}'"
+        onclick="window.location.href='{% if user.is_authenticated %}{% url 'core-ingredient_scanner_dashboard' %}{% else %}{% url 'core-login' %}{% endif %}'"
       >
         <div class="bg-yellow-100 rounded-full p-4 mb-4">
           <svg
@@ -128,7 +87,7 @@
       <!-- Feature 3 -->
       <div
         class="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:shadow-2xl transition cursor-pointer"
-        onclick="window.location.href='{% url 'core-donation_portal_dashboard' %}'"
+        onclick="window.location.href='{% if user.is_authenticated %}{% url 'core-donation_portal_dashboard' %}{% else %}{% url 'core-login' %}{% endif %}'"
       >
         <div class="bg-blue-100 rounded-full p-4 mb-4">
           <svg
@@ -154,7 +113,7 @@
       <!-- Feature 4 -->
       <div
         class="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center hover:shadow-2xl transition cursor-pointer"
-        onclick="window.location.href='{% url 'core-community_watch' %}'"
+        onclick="window.location.href='{% if user.is_authenticated %}{% url 'core-community_watch' %}{% else %}{% url 'core-login' %}{% endif %}'"
       >
         <div class="bg-red-100 rounded-full p-4 mb-4">
           <svg
@@ -177,46 +136,5 @@
         </p>
       </div>
     </div>
-
-    <style>
-      body.dark {
-        background: #1a2233;
-      }
-      .dark .bg-white {
-        background: #23293f !important;
-      }
-      .dark .text-gray-700,
-      .dark .text-gray-600 {
-        color: #f3f4f6 !important;
-      }
-      .dark .text-gray-400,
-      .dark .text-gray-500 {
-        color: #cbd5e1 !important;
-      }
-      .dark .shadow {
-        box-shadow: 0 5px 20px 0 rgba(30, 41, 59, 0.4) !important;
-      }
-      .dark input,
-      .dark textarea {
-        background: #23293f !important;
-        color: #f3f4f6 !important;
-        border-color: #334155 !important;
-      }
-      .dark .bg-gray-50 {
-        background: #1a2233 !important;
-      }
-      .dark .bg-primary {
-        background: #4caf50 !important;
-      }
-      .dark .bg-danger {
-        background: #ff6b6b !important;
-      }
-      .dark .text-primary {
-        color: #4caf50 !important;
-      }
-      .dark .text-danger {
-        color: #ff6b6b !important;
-      }
-    </style>
-  </body>
+</body>
 </html>
