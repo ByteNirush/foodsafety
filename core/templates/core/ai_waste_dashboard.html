@@ -28,6 +28,35 @@
     </script>
   </head>
   <body class="font-sans antialiased min-h-screen bg-gray-50">
+  <body
+    class="font-sans antialiased min-h-screen dashboard-bg bg-gradient-to-bl from-green-100 via-yellow-50 to-red-50 relative overflow-hidden"
+  >
+    <!-- Animated Food Fight Background -->
+    <svg
+      class="absolute animate-fly1 left-10 top-24 w-20 h-20 z-0 pointer-events-none"
+      viewBox="0 0 64 64"
+    >
+      <!-- Tomato -->
+      <circle cx="32" cy="32" r="20" fill="#FF6B6B" />
+      <ellipse cx="32" cy="22" rx="8" ry="4" fill="#4CAF50" />
+    </svg>
+    <svg
+      class="absolute animate-fly2 right-16 top-40 w-16 h-16 z-0 pointer-events-none"
+      viewBox="0 0 64 64"
+    >
+      <!-- Bread -->
+      <rect x="12" y="20" width="40" height="28" rx="12" fill="#FFE066" />
+      <ellipse cx="32" cy="20" rx="20" ry="10" fill="#FFD166" />
+    </svg>
+    <svg
+      class="absolute animate-fly3 left-1/2 bottom-10 w-14 h-14 z-0 pointer-events-none"
+      viewBox="0 0 64 64"
+    >
+      <!-- Cheese -->
+      <rect x="16" y="24" width="32" height="24" rx="8" fill="#FFD166" />
+      <circle cx="28" cy="36" r="3" fill="#FFEDC2" />
+      <circle cx="40" cy="44" r="2" fill="#FFEDC2" />
+    </svg>
     <!-- Header -->
     <div class="flex items-center justify-between px-8 py-6 bg-white shadow">
       <div class="flex items-center space-x-3">
@@ -49,9 +78,15 @@
           class="bg-gray-100 text-primary px-5 py-2 rounded-lg font-semibold hover:bg-gray-200 transition flex items-center"
           title="Profile"
         >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+          <svg
+            class="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4 4-7 8-7s8 3 8 7" />
           </svg>
           Profile
         </a>
@@ -73,13 +108,14 @@
         Enter your leftover ingredients and let our AI suggest creative recipes
         and tips to reduce food waste!
       </p>
-      <form class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+      <form id="wasteForm" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1"
             >Your Ingredients</label
           >
           <input
             type="text"
+            id="ingredients"
             class="w-full p-2 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary outline-none"
             placeholder="e.g. rice, tomato, chicken, spinach"
             required
@@ -92,40 +128,221 @@
           Get Recipes & Tips
         </button>
       </form>
-      <!-- Example AI Output Section -->
-      <div class="mt-10">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">
-          Suggested Recipes
-        </h2>
-        <ul class="space-y-4">
-          <li class="bg-green-50 border-l-4 border-primary p-4 rounded">
-            <div class="font-semibold text-primary">
-              Spinach Chicken Rice Bowl
-            </div>
-            <div class="text-gray-700 text-sm mt-1">
-              Combine leftover rice, sautéed spinach, and grilled chicken. Top
-              with fresh tomatoes and a squeeze of lemon for a healthy meal.
-            </div>
-          </li>
-          <li class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-            <div class="font-semibold text-yellow-700">
-              Tomato Rice Frittata
-            </div>
-            <div class="text-gray-700 text-sm mt-1">
-              Mix rice, chopped tomatoes, and eggs. Bake in a skillet for a
-              quick frittata. Add cheese if available.
-            </div>
-          </li>
-        </ul>
-        <h2 class="text-xl font-semibold text-gray-800 mt-8 mb-4">
-          Waste Reduction Tips
-        </h2>
-        <ul class="list-disc pl-6 text-gray-700 space-y-2">
-          <li>Store leftovers in airtight containers to extend freshness.</li>
-          <li>Plan meals ahead to use up perishable ingredients first.</li>
-          <li>Compost vegetable scraps to reduce landfill waste.</li>
-        </ul>
+      <!-- AI Output Section -->
+      <div id="aiResponse" class="mt-10 hidden">
+        <div id="loading" class="text-center py-4 hidden">
+          <div
+            class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"
+          ></div>
+          <p class="mt-2 text-gray-600">Getting recipes and tips...</p>
+        </div>
+        <div
+          id="error"
+          class="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-4 hidden"
+        >
+          <p class="text-red-700">
+            Sorry, there was an error getting recipes. Please try again.
+          </p>
+        </div>
+        <div id="recipes" class="space-y-4"></div>
+        <div id="tips" class="mt-8"></div>
       </div>
     </div>
+
+    <script>
+      document
+        .getElementById("wasteForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const ingredients = document.getElementById("ingredients").value;
+          const aiResponse = document.getElementById("aiResponse");
+          const loading = document.getElementById("loading");
+          const error = document.getElementById("error");
+          const recipes = document.getElementById("recipes");
+          const tips = document.getElementById("tips");
+
+          // Show loading state
+          aiResponse.classList.remove("hidden");
+          loading.classList.remove("hidden");
+          error.classList.add("hidden");
+          recipes.innerHTML = "";
+          tips.innerHTML = "";
+
+          try {
+            const response = await fetch("/ai_waste_chatbot/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+              },
+              body: JSON.stringify({
+                message: `I have these ingredients: ${ingredients}. Please suggest recipes and waste reduction tips. Format the response with "Recipes:" and "Tips:" sections.`,
+              }),
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+              throw new Error(data.error);
+            }
+
+            // Parse the AI response
+            const content = data.response;
+            const [recipesSection, tipsSection] = content.split("Tips:");
+
+            // Display recipes
+            if (recipesSection) {
+              const recipesList = recipesSection
+                .replace("Recipes:", "")
+                .trim()
+                .split("\n");
+              recipes.innerHTML = `
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">Suggested Recipes</h2>
+              <ul class="space-y-4">
+                ${recipesList
+                  .map(
+                    (recipe) => `
+                  <li class="bg-green-50 border-l-4 border-primary p-4 rounded">
+                    <div class="text-gray-700">${recipe.trim()}</div>
+                  </li>
+                `
+                  )
+                  .join("")}
+              </ul>
+            `;
+            }
+
+            // Display tips
+            if (tipsSection) {
+              const tipsList = tipsSection.trim().split("\n");
+              tips.innerHTML = `
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">Waste Reduction Tips</h2>
+              <ul class="list-disc pl-6 text-gray-700 space-y-2">
+                ${tipsList.map((tip) => `<li>${tip.trim()}</li>`).join("")}
+              </ul>
+            `;
+            }
+          } catch (err) {
+            error.classList.remove("hidden");
+            error.querySelector("p").textContent =
+              err.message ||
+              "Sorry, there was an error getting recipes. Please try again.";
+          } finally {
+            loading.classList.add("hidden");
+          }
+        });
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+    </script>
+
+    <style>
+      /* Food flying/fighting keyframes */
+      @keyframes fly1 {
+        0% {
+          transform: translateY(0) rotate(-10deg) scale(1);
+        }
+        30% {
+          transform: translateY(-40px) translateX(30px) rotate(10deg) scale(1.1);
+        }
+        60% {
+          transform: translateY(10px) translateX(-10px) rotate(-20deg)
+            scale(0.95);
+        }
+        100% {
+          transform: translateY(0) rotate(-10deg) scale(1);
+        }
+      }
+      @keyframes fly2 {
+        0% {
+          transform: translateY(0) rotate(10deg) scale(1);
+        }
+        25% {
+          transform: translateY(-30px) translateX(-20px) rotate(-10deg)
+            scale(1.05);
+        }
+        50% {
+          transform: translateY(20px) translateX(20px) rotate(20deg) scale(1.1);
+        }
+        100% {
+          transform: translateY(0) rotate(10deg) scale(1);
+        }
+      }
+      @keyframes fly3 {
+        0% {
+          transform: translateY(0) rotate(0deg) scale(1);
+        }
+        20% {
+          transform: translateY(-20px) translateX(10px) rotate(15deg)
+            scale(1.08);
+        }
+        60% {
+          transform: translateY(30px) translateX(-20px) rotate(-10deg)
+            scale(0.92);
+        }
+        100% {
+          transform: translateY(0) rotate(0deg) scale(1);
+        }
+      }
+      .animate-fly1 {
+        animation: fly1 4s ease-in-out infinite alternate;
+      }
+      .animate-fly2 {
+        animation: fly2 5s ease-in-out infinite alternate;
+      }
+      .animate-fly3 {
+        animation: fly3 3.5s ease-in-out infinite alternate;
+      }
+
+      /* Card bounce animation */
+      @keyframes bounce-short {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+      .animate-bounce-short {
+        animation: bounce-short 1.2s infinite;
+      }
+
+      /* Slow spin for logo */
+      @keyframes spin-slow {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .animate-spin-slow {
+        animation: spin-slow 8s linear infinite;
+      }
+
+      /* Primary color for text */
+      .text-primary {
+        color: #4caf50;
+      }
+      .bg-primary {
+        background: #4caf50;
+      }
+    </style>
   </body>
 </html>

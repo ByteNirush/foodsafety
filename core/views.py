@@ -17,6 +17,10 @@ from requests.exceptions import RequestException
 
 from .models import CustomUser, Donation, Product, CommunityReport, Comment
 
+import logging
+
+from foodsafety import settings
+
 logger = logging.getLogger(__name__)
 
 def index(request):
@@ -317,7 +321,7 @@ def check_safety(request):
                 for item in safety_response:
                     item['ingredient'] = ingredient
                 return JsonResponse(safety_response, safe=False)
-            except requests.exceptions.RequestException as e:
+            except Exception as e:
                 return JsonResponse({
                     "error": f"API request failed: {str(e)}"
                 }, status=500)
@@ -365,93 +369,99 @@ def donation_history(request):
     donations = Donation.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'core/donation_history.html', {'donations': donations})
 
+
 @login_required
 def get_response(request):
     if request.method == 'POST':
         message = request.POST.get('message', '')
         if not message:
             return JsonResponse({'error': 'No message provided'}, status=400)
+
         try:
-            url = settings.OPENROUTER_API_URL
-            logger.info(f"Making request to OpenRouter API: {url}")
+            url = "https://openrouter.ai/api/v1/chat/completions"
             headers = {
-                'Authorization': f'Bearer {settings.OPENROUTER_API_KEY}',
-                'Content-Type': 'application/json',
-                'HTTP-Referer': request.build_absolute_uri('/'),
-                'X-Title': 'FreshGuard+ Food Safety Assistant'
+                "Authorization": "Bearer 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",
+                "Content-Type": "application/json",
+                "HTTP-Referer": request.build_absolute_uri('/'),
+                "X-Title": "FreshGuard+ Food Safety Assistant"
             }
-            messages_arr = [
-                {
-                    "role": "system",
-                    "content": """You are a Food Safety Assistant, an expert in food safety, handling, and regulations. 
-                    Your role is to provide accurate, helpful information about:
-                    - Food handling and storage best practices
-                    - Food safety regulations and compliance
-                    - Preventing foodborne illnesses
-                    - Restaurant food safety guidelines
-                    - Home food safety tips
-                    - Food waste reduction
-                    - Food safety certifications
-                    - Food safety training requirements
-                    
-                    Always provide practical, actionable advice and cite relevant regulations when applicable.
-                    If you're unsure about something, acknowledge the limitation and suggest consulting a food safety expert."""
-                },
-                {
-                    "role": "user",
-                    "content": message
-                }
-            ]
-            logger.info(f"Request payload: {{'model': 'anthropic/claude-3-opus:beta', 'messages': [{{'role': 'system'}}, {{'role': 'user'}}]}}")
-            response = requests.post(
-                url,
-                headers=headers,
-                json={
-                    "model": "anthropic/claude-3-opus:beta",
-                    "messages": messages_arr,
-                    "temperature": 0.7,
-                    "max_tokens": 1000
-                },
-                timeout=30
-            )
-            logger.info(f"API Response Status: {response.status_code}")
+            payload = {
+                "model": "anthropic/claude-3-opus:beta",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": """You are a Food Safety Assistant, an expert in food safety, handling, and regulations. 
+                        Your role is to provide accurate, helpful information about:
+                        - Food handling and storage best practices
+                        - Food safety regulations and compliance
+                        - Preventing foodborne illnesses
+                        - Restaurant food safety guidelines
+                        - Home food safety tips
+                        - Food waste reduction
+                        - Food safety certifications
+                        - Food safety training requirements
+
+                        Always provide practical, actionable advice and cite relevant regulations when applicable.
+                        If you're unsure about something, acknowledge the limitation and suggest consulting a food safety expert."""
+                    },
+                    {
+                        "role": "user",
+                        "content": message
+                    }
+                ],
+                "max_tokens": 300,
+                "temperature": 0.7
+            }
+
+            response = requests.post(url, json=payload, headers=headers, timeout=30)
             response.raise_for_status()
-            data = response.json()
-            logger.info("Successfully received response from OpenRouter API")
-            return JsonResponse(data)
+            result = response.json()
+            ai_response = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+            return JsonResponse({'response': ai_response})
+
         except requests.exceptions.RequestException as e:
-            error_msg = f"API request failed: {str(e)}"
-            logger.error(error_msg)
-            if hasattr(e.response, 'text'):
-                logger.error(f"Response text: {e.response.text}")
-            return JsonResponse({
-                'error': 'Failed to get response from AI service. Please try again.'
-            }, status=500)
+            logger.error(f"OpenRouter API request failed: {str(e)}")
+            if hasattr(e, 'response') and e.response is not None:
+                logger.error(f"API response: {e.response.text}")
+            return JsonResponse({'error': 'Failed to get response from AI service'}, status=500)
         except Exception as e:
-            error_msg = f"Unexpected error: {str(e)}"
-            logger.error(error_msg)
-            return JsonResponse({
-                'error': 'An unexpected error occurred. Please try again.'
-            }, status=500)
+            logger.error(f"Unexpected error in get_response: {str(e)}")
+            return JsonResponse({'error': 'An unexpected error occurred. Please try again later.'}, status=500)
+
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+
+
+
+
+
+
 
 @login_required
 def ai_waste_chatbot(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=405)
+    
     try:
         data = json.loads(request.body)
         message = data.get('message')
+        
         if not message:
             return JsonResponse({'error': 'Message is required'}, status=400)
+        
+        # Get the API key and URL from settings
         api_key = settings.OPENROUTER_API_KEY
         api_url = settings.OPENROUTER_API_URL
+        
+        # Prepare the request to OpenRouter API
         headers = {
             'Authorization': f'Bearer {api_key}',
             'Content-Type': 'application/json',
             'HTTP-Referer': request.build_absolute_uri('/'),
             'X-Title': 'FreshGuard+ Waste Reduction'
         }
+        
         payload = {
             'model': 'openai/gpt-3.5-turbo',
             'messages': [
@@ -467,11 +477,17 @@ def ai_waste_chatbot(request):
             'max_tokens': 400,
             'temperature': 0.7
         }
+        
+        # Make the request to OpenRouter API
         response = requests.post(api_url, headers=headers, json=payload, timeout=30)
         response.raise_for_status()
+        
+        # Parse the response
         result = response.json()
         ai_response = result['choices'][0]['message']['content']
+        
         return JsonResponse({'response': ai_response})
+        
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON data'}, status=400)
     except requests.exceptions.RequestException as e:
@@ -482,76 +498,3 @@ def ai_waste_chatbot(request):
     except Exception as e:
         logger.error(f"Unexpected error in ai_waste_chatbot: {str(e)}")
         return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
-
-def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_tokens=200, temperature=0.7, max_retries=3):
-    url = settings.OPENROUTER_API_URL
-    headers = {
-        "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost:8000",
-        "X-Title": "FreshGuard+ Food Safety Assistant"
-    }
-    payload = {
-        "model": model,
-        "messages": messages,
-        "max_tokens": max_tokens,
-        "temperature": temperature
-    }
-    retry_count = 0
-    base_delay = 1
-    while retry_count < max_retries:
-        try:
-            logger.info(f"Making request to OpenRouter API (attempt {retry_count + 1}/{max_retries})")
-            response = requests.post(url, json=payload, headers=headers, timeout=30)
-            if response.status_code == 401:
-                logger.error("Authentication failed: Invalid or expired API key")
-                raise Exception("Authentication failed. Please check your API key configuration.")
-            elif response.status_code == 402:
-                logger.error("Payment required: Insufficient credits")
-                if max_tokens > 100:
-                    logger.info(f"Retrying with reduced tokens: {max_tokens - 50}")
-                    return call_openrouter_api(messages, model, max_tokens - 50, temperature, max_retries)
-                raise Exception("Insufficient credits. Please add credits to your OpenRouter account.")
-            elif response.status_code == 429:
-                logger.warning("Rate limit exceeded. Retrying with backoff...")
-                retry_count += 1
-                if retry_count < max_retries:
-                    delay = base_delay * (2 ** retry_count)
-                    time.sleep(delay)
-                    continue
-                raise Exception("Rate limit exceeded. Please try again later.")
-            response.raise_for_status()
-            result = response.json()
-            if not result or 'choices' not in result or not result['choices']:
-                logger.error("Invalid response format from API")
-                raise Exception("Invalid response from AI service")
-            return result
-        except RequestException as e:
-            logger.error(f"API request failed (attempt {retry_count + 1}/{max_retries}): {str(e)}")
-            if hasattr(e, 'response') and e.response is not None:
-                logger.error(f"Response text: {e.response.text}")
-            retry_count += 1
-            if retry_count < max_retries:
-                delay = base_delay * (2 ** retry_count)
-                logger.info(f"Retrying in {delay} seconds...")
-                time.sleep(delay)
-            else:
-                raise Exception("Failed to connect to AI service after multiple attempts. Please try again later.")
-        except Exception as e:
-            logger.error(f"Unexpected error: {str(e)}")
-            raise Exception("An unexpected error occurred. Please try again later.")
-
-def get_fallback_response():
-    return {
-        "choices": [{
-            "message": {
-                "content": "I apologize, but I'm currently unable to process your request. This could be due to:\n\n" +
-                          "1. Temporary service interruption\n" +
-                          "2. High server load\n" +
-                          "3. Network connectivity issues\n\n" +
-                          "Please try again in a few moments. If the problem persists, you can:\n" +
-                          "- Check your internet connection\n" +
-                          "Contact support if the issue continues"
-            }
-        }]
-    }

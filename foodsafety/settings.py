@@ -4,7 +4,11 @@ Django settings for foodsafety project.
 
 import os
 from pathlib import Path
-OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
+
+# OpenRouter API Configuration
+OPENROUTER_API_KEY = "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"
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'Rojan123'  # Replace with a secure key
@@ -96,3 +100,33 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'core': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
