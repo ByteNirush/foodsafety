@@ -149,6 +149,64 @@ def logout_view(request):
     logout(request)
     return redirect('index')
 
+
+def call_openrouter_api(messages, model="anthropic/claude-3-opus:beta", max_tokens=200, temperature=0.7, max_retries=3):
+    url = settings.OPENROUTER_API_URL
+    headers = {
+        "Authorization": f"Bearer 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",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost:8000",
+        "X-Title": "FreshGuard+ Food Safety Assistant"
+    }
+    payload = {
+        "model": model,
+        "messages": messages,
+        "max_tokens": max_tokens,
+        "temperature": temperature
+    }
+    retry_count = 0
+    base_delay = 1
+    while retry_count < max_retries:
+        try:
+            logger.info(f"Making request to OpenRouter API (attempt {retry_count + 1}/{max_retries})")
+            response = requests.post(url, json=payload, headers=headers, timeout=30)
+            if response.status_code == 401:
+                logger.error("Authentication failed: Invalid or expired API key")
+                raise Exception("Authentication failed. Please check your API key configuration.")
+            elif response.status_code == 402:
+                logger.error("Payment required: Insufficient credits")
+                if max_tokens > 100:
+                    logger.info(f"Retrying with reduced tokens: {max_tokens - 50}")
+                    return call_openrouter_api(messages, model, max_tokens - 50, temperature, max_retries)
+                raise Exception("Insufficient credits. Please add credits to your OpenRouter account.")
+            elif response.status_code == 429:
+                logger.warning("Rate limit exceeded. Retrying with backoff...")
+                retry_count += 1
+                if retry_count < max_retries:
+                    delay = base_delay * (2 ** retry_count)
+                    time.sleep(delay)
+                    continue
+                raise Exception("Rate limit exceeded. Please try again later.")
+            response.raise_for_status()
+            result = response.json()
+            if not result or 'choices' not in result or not result['choices']:
+                logger.error("Invalid response format from API")
+                raise Exception("Invalid response from AI service")
+            return result
+        except RequestException as e:
+            logger.error(f"API request failed (attempt {retry_count + 1}/{max_retries}): {str(e)}")
+            if hasattr(e, 'response') and e.response is not None:
+                logger.error(f"Response text: {e.response.text}")
+            retry_count += 1
+            if retry_count < max_retries:
+                delay = base_delay * (2 ** retry_count)
+                logger.info(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                raise Exception("Failed to connect to AI service after multiple attempts. Please try again later.")
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            raise Exception("An unexpected error occurred. Please try again later.")
 @login_required
 def donation_portal_dashboard(request):
     search_query = request.GET.get('search', '')
@@ -380,43 +438,39 @@ def get_response(request):
         try:
             url = "https://openrouter.ai/api/v1/chat/completions"
             headers = {
-                "Authorization": "Bearer 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",
+                "Authorization": "Bearer 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",
                 "Content-Type": "application/json",
                 "HTTP-Referer": request.build_absolute_uri('/'),
                 "X-Title": "FreshGuard+ Food Safety Assistant"
             }
             payload = {
-                "model": "anthropic/claude-3-opus:beta",
+                "model": "mistralai/devstral-small:free",
                 "messages": [
                     {
                         "role": "system",
-                        "content": """You are a Food Safety Assistant, an expert in food safety, handling, and regulations. 
-                        Your role is to provide accurate, helpful information about:
-                        - Food handling and storage best practices
-                        - Food safety regulations and compliance
-                        - Preventing foodborne illnesses
-                        - Restaurant food safety guidelines
-                        - Home food safety tips
-                        - Food waste reduction
-                        - Food safety certifications
-                        - Food safety training requirements
-
-                        Always provide practical, actionable advice and cite relevant regulations when applicable.
-                        If you're unsure about something, acknowledge the limitation and suggest consulting a food safety expert."""
+                        "content": (
+                            "You are a helpful Food Safety Assistant. "
+                            "Answer user questions about food safety, food storage, foodborne illnesses, "
+                            "safe cooking practices, and healthy eating. "
+                            "Be concise, practical, and friendly. If you don't know, say so honestly."
+                        )
                     },
                     {
                         "role": "user",
                         "content": message
                     }
                 ],
-                "max_tokens": 300,
+                "max_tokens": 120,
                 "temperature": 0.7
             }
 
             response = requests.post(url, json=payload, headers=headers, timeout=30)
             response.raise_for_status()
             result = response.json()
-            ai_response = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+            ai_message = result.get('choices', [{}])[0].get('message', {})
+            ai_response = ai_message.get('content', '').strip()
+            if not ai_response:
+                ai_response = "Sorry, I couldn't generate a direct answer. Please try rephrasing your question."
             return JsonResponse({'response': ai_response})
 
         except requests.exceptions.RequestException as e:

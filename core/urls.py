@@ -24,5 +24,5 @@ urlpatterns = [
     path('community-watch/comment/<int:report_id>/', views.add_comment, name='add-comment'),
     path('community-watch/delete/<int:report_id>/', views.delete_community_report, name='delete-community-report'),
     path('donation-history/', views.donation_history, name='donation-history'),
-    path('get_response/', views.get_response, name='get_response'),
-    ]
+    path('get_response/', views.get_response, name='core-get_response'),    
+]
