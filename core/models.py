@@ -21,7 +21,7 @@ class CustomUser(AbstractUser):
         ('Hypertension', 'Hypertension'),
         ('Asthma', 'Asthma'),
         ('Allergy (Peanut)', 'Allergy (Peanut)'),
-        ('Allergy (Lactose)', 'Allergy (Lactose)'),
+        ('Lactose Intolerant', 'Lactose Intolerant'),
         ('Heart Disease', 'Heart Disease'),
         ('Other', 'Other'),
     ])
