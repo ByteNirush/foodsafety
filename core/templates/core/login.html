@@ -88,49 +88,6 @@
           {% csrf_token %}
           <div>
             <label class="block text-sm font-medium text-gray-600 mb-1"
-              >Select Role</label
-            >
-            <div class="flex gap-3">
-              <button
-                type="button"
-                onclick="setRole('admin')"
-                class="flex-1 p-2 bg-blue-100 rounded-lg font-semibold text-blue-700 flex items-center justify-center gap-2 hover:bg-blue-200 transition-transform duration-200 ease-in-out transform hover:scale-105 active:scale-95 animate-bounce-short"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                </svg>
-                Admin
-              </button>
-              <button
-                type="button"
-                onclick="setRole('public')"
-                class="flex-1 p-2 bg-red-100 rounded-lg font-semibold text-red-700 flex items-center justify-center gap-2 hover:bg-red-200 transition-transform duration-200 ease-in-out transform hover:scale-105 active:scale-95 animate-bounce-short"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <circle cx="12" cy="7" r="4" />
-                  <path
-                    d="M5.5 21h13a2 2 0 0 0 2-2v-1a7 7 0 0 0-7-7h-2a7 7 0 0 0-7 7v1a2 2 0 0 0 2 2z"
-                  />
-                </svg>
-                Public
-              </button>
-            </div>
-            <input type="hidden" name="role" id="role" value="public" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-600 mb-1"
               >Email</label
             >
             <input
@@ -159,7 +116,7 @@
           {% endif %}
           <button
             type="submit"
-            class="w-full bg-primary text-white rounded-lg py-2 font-semibold hover:bg-green-600 transition-transform duration-200 ease-in-out transform hover:scale-105 active:scale-95 animate-bounce-short"
+            class="w-full bg-primary text-white rounded-lg py-2 font-semibold hover:bg-green-600 transition-transform duration-200 ease-in-out transform hover:scale-105 active:scale-95"
           >
             Login
           </button>

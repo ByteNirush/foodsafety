@@ -25,7 +25,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
-    'chatbot',
 ]
 
 MIDDLEWARE = [
@@ -125,11 +124,6 @@ LOGGING = {
     },
     'loggers': {
         'core': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'chatbot': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': True,
